@@ -12,15 +12,23 @@
   - Thiết kế UI components
   - Hiệu ứng và animations
 - Khởi tạo backend microservices:
-  - Service Registry (Eureka Server)
+  - Service Registry (Eureka Server) - đã chạy thành công trên cổng 8761
   - API Gateway
   - User Service
   - Messaging Service
 - Thiết lập cơ sở dữ liệu:
   - PostgreSQL cho User Service
   - MongoDB cho Messaging Service
+- Cập nhật và sửa lỗi:
+  - Cập nhật JUnit tests từ JUnit 3 lên JUnit 5 cho Service Registry
+  - Sửa lỗi compile cho Service Registry tests
+  - Khởi động thành công Eureka Server
 
 ## Đang Thực Hiện
+- Triển khai các Microservices:
+  - Kết nối API Gateway với Eureka Server
+  - Kết nối User Service với Eureka Server
+  - Kết nối Messaging Service với Eureka Server
 - Hoàn thiện các tính năng UI/UX:
   - Thêm dark mode
   - Cải thiện responsive design
