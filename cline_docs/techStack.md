@@ -20,7 +20,7 @@
   - React Query cho server state
 
 - **Real-time Communication**: 
-  - Socket.IO Client
+  - WebSocket (STOMP over SockJS)
   - WebRTC cho voice/video (tương lai)
 
 ## Backend
@@ -33,9 +33,9 @@
   - Spring Data MongoDB
   - Spring Data JPA
 
-- **Authentication**: JWT
+- **Authentication**: JWT (planned)
 
-## Cơ Sở Dữ Liệu
+## Cơ Sở Dữ liệu
 - **User Service**: 
   - PostgreSQL
   - Database: chatapp_users
@@ -90,9 +90,9 @@
   - Cypress cho E2E
 
 ## DevOps & Công Cụ
-- **Container**: Docker
-- **CI/CD**: GitHub Actions
-- **Monitoring**: Prometheus & Grafana
+- **Container**: Docker (planned)
+- **CI/CD**: GitHub Actions (planned)
+- **Monitoring**: Prometheus & Grafana (planned)
 - **Testing**: JUnit 5, React Testing Library
 
 ## Quyết Định Kiến Trúc
@@ -101,12 +101,14 @@
 - Tailwind CSS + SCSS cho styling linh hoạt
 - Framer Motion cho animations mượt mà giống Telegram
 - Custom components dựa trên Radix UI để có UI/UX giống Telegram
+- Xử lý duplicate messages trong useChat hook
 
 ### Backend
 - Microservices architecture cho khả năng mở rộng tốt
 - Service Registry (Eureka) cho service discovery
 - WebSocket và REST endpoints cho giao tiếp đa dạng
-- JWT cho xác thực bảo mật
+- JWT cho xác thực bảo mật (planned)
+- Xử lý LocalDateTime serialization với Jackson
 
 ### Database
 - PostgreSQL cho dữ liệu người dùng và xác thực
@@ -115,3 +117,8 @@
   * Hỗ trợ tốt cho dữ liệu phi cấu trúc
   * Tích hợp sẵn sharding và replication
 - Redis cho caching và tối ưu hiệu suất (planned)
+
+## Xử lý Date/Time
+- Sử dụng java.time.LocalDateTime cho backend
+- Cấu hình Jackson để hỗ trợ serialization/deserialization của LocalDateTime
+- Sử dụng ISO 8601 format cho date/time trong giao tiếp giữa frontend và backend

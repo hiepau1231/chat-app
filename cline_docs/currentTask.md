@@ -31,6 +31,8 @@
     * GET /api/messages/room/{roomId} - Lấy tin nhắn của phòng
     * GET /api/messages/user/{userId} - Lấy tin nhắn của user
     * DELETE /api/messages/{id} - Xóa tin nhắn
+- Giải quyết vấn đề LocalDateTime serialization
+- Sửa lỗi tin nhắn bị duplicate trong frontend
 
 ## Đang Thực Hiện
 - Triển khai các Microservices:
@@ -43,16 +45,14 @@
   - Tối ưu animations
 - Phát triển backend services:
   - Hoàn thiện API endpoints
-  - Tích hợp WebSocket cho real-time messaging
+  - Tối ưu hiệu suất WebSocket cho real-time messaging
   - Tích hợp JWT authentication
 
 ## Các Bước Tiếp Theo
-1. Tính Năng Chat
-   - Implement WebSocket client trong frontend
-   - Kết nối với messaging service
-   - Xây dựng real-time chat functionality
-   - Thêm typing indicators
-   - Triển khai file sharing
+1. Tối ưu hiệu suất
+   - Implement caching strategy cho API calls
+   - Tối ưu truy vấn database
+   - Cải thiện độ trễ của real-time messaging
 
 2. Authentication Flow
    - Tích hợp JWT authentication
@@ -60,25 +60,31 @@
    - Implement session management
    - Bảo mật API endpoints
 
-3. Testing & Optimization
+3. Tính năng nâng cao
+   - Triển khai file sharing
+   - Thêm tính năng tìm kiếm tin nhắn
+   - Implement notification system
+
+4. Testing & Optimization
    - Unit tests cho frontend components
    - Integration tests cho backend services
-   - Performance optimization
+   - Performance testing
    - Security hardening
 
-4. DevOps & Deployment
+5. DevOps & Deployment
    - Cấu hình Docker containers
    - Thiết lập CI/CD pipeline
-   - Monitoring với Prometheus & Grafana
+   - Implement monitoring với Prometheus & Grafana
 
 ## Liên Kết với Lộ Trình
 - Đã hoàn thành phần "Giao diện UI/UX (Telegram Style)" trong projectRoadmap.md
-- Đang tiến hành phần "Tính Năng Chính" với focus vào real-time messaging và authentication
-- Chuẩn bị cho việc triển khai các tính năng Telegram-like (reactions, reply thread, etc.)
+- Đã hoàn thành phần cơ bản của "Nhắn tin thời gian thực" trong projectRoadmap.md
+- Đang tiến hành tối ưu hiệu suất và cải thiện trải nghiệm người dùng
+- Chuẩn bị cho việc triển khai hệ thống xác thực và các tính năng nâng cao
 
 ## Vấn Đề Cần Giải Quyết
 - Tối ưu hiệu suất giữa các microservices
-- Đảm bảo độ trễ thấp cho real-time messaging
-- Xử lý đồng thời nhiều kết nối WebSocket
-- Caching strategy cho API calls
-- Xử lý lỗi và retry mechanism cho MongoDB Atlas connection
+- Cải thiện xử lý lỗi và retry mechanism cho các kết nối database
+- Xử lý đồng thời nhiều kết nối WebSocket hiệu quả
+- Implement caching strategy hiệu quả cho API calls
+- Đảm bảo bảo mật cho toàn bộ hệ thống

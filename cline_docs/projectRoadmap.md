@@ -3,7 +3,7 @@
 ## Mục Tiêu Chính
 - [x] Xây dựng hệ thống chat thời gian thực với giao diện giống Telegram
 - [ ] Đảm bảo khả năng mở rộng
-- [ ] Tạo giao diện người dùng thân thiện và quen thuộc
+- [x] Tạo giao diện người dùng thân thiện và quen thuộc
 - [ ] Triển khai hệ thống bảo mật
 
 ## Tính Năng UI/UX (Telegram Style)
@@ -16,7 +16,7 @@
 - [x] Giao diện chat
   - [x] Bong bóng chat với góc bo tròn
   - [x] Hiển thị avatar người dùng
-  - [ ] Hiệu ứng loading tin nhắn
+  - [x] Hiệu ứng loading tin nhắn
   - [x] Animations mượt mà
 
 - [ ] Tính năng Telegram-like
@@ -46,9 +46,9 @@
 - [x] Nhắn tin thời gian thực
   - [x] WebSocket setup
   - [x] REST endpoints cho tin nhắn
-  - [ ] Gửi và nhận tin nhắn văn bản
-  - [ ] Chỉ báo đang nhập
-  - [ ] Xem trạng thái tin nhắn
+  - [x] Gửi và nhận tin nhắn văn bản
+  - [x] Chỉ báo đang nhập
+  - [x] Xem trạng thái tin nhắn
 
 - [x] Phòng Chat
   - [x] API cho tạo và quản lý phòng
@@ -57,7 +57,7 @@
   - [ ] Quản lý thành viên
 
 - [ ] Tính năng bổ sung
-  - [ ] Chia sẻ file
+  - [x] Chia sẻ file
   - [ ] Tìm kiếm tin nhắn
   - [ ] Thông báo
 
@@ -65,7 +65,7 @@
 - [x] Giao diện giống với Telegram ít nhất 90%
 - [ ] Hệ thống hoạt động ổn định
 - [x] Animations mượt mà, không giật lag
-- [ ] Độ trễ tin nhắn thấp
+- [x] Độ trễ tin nhắn thấp
 - [ ] Bảo mật thông tin người dùng
 
 ## Công Việc Đã Hoàn Thành
@@ -80,6 +80,13 @@
   - [x] MongoDB Atlas cho messages
 - [x] Cấu hình WebSocket và REST endpoints
 - [x] Service discovery với Eureka
+- [x] Xử lý LocalDateTime serialization
+- [x] Giải quyết vấn đề tin nhắn bị duplicate
+
+## Công Việc Đang Thực Hiện
+- [ ] Tối ưu hiệu suất
+- [ ] Cải thiện xử lý lỗi và retry mechanism
+- [ ] Triển khai hệ thống xác thực người dùng
 
 ## Kế Hoạch Mở Rộng
 - Hỗ trợ cuộc gọi âm thanh/video
@@ -88,3 +95,4 @@
 - Tối ưu hiệu suất MongoDB Atlas
 - Thêm Redis caching layer
 - Monitoring với Prometheus & Grafana
+- Triển khai CI/CD pipeline
