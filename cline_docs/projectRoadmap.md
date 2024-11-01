@@ -27,20 +27,34 @@
   - [ ] Stickers support
 
 ## Tính Năng Chính
+- [x] Microservices Architecture
+  - [x] Service Registry (Eureka Server)
+  - [x] API Gateway
+  - [x] User Service
+  - [x] Messaging Service
+
+- [x] Cơ sở dữ liệu
+  - [x] PostgreSQL cho User Service
+  - [x] MongoDB Atlas cho Messaging Service
+  - [ ] Redis cho caching
+
 - [ ] Xác thực người dùng
   - [ ] Đăng ký
   - [ ] Đăng nhập
   - [ ] Quản lý phiên đăng nhập
 
-- [ ] Nhắn tin thời gian thực
+- [x] Nhắn tin thời gian thực
+  - [x] WebSocket setup
+  - [x] REST endpoints cho tin nhắn
   - [ ] Gửi và nhận tin nhắn văn bản
   - [ ] Chỉ báo đang nhập
   - [ ] Xem trạng thái tin nhắn
 
-- [ ] Phòng Chat
-  - [ ] Tạo phòng chat
-  - [ ] Chat nhóm
-  - [ ] Chat riêng tư
+- [x] Phòng Chat
+  - [x] API cho tạo và quản lý phòng
+  - [x] Chat nhóm
+  - [x] Chat riêng tư
+  - [ ] Quản lý thành viên
 
 - [ ] Tính năng bổ sung
   - [ ] Chia sẻ file
@@ -60,8 +74,17 @@
 - [x] Thiết lập tài liệu dự án
 - [x] Cài đặt và cấu hình frontend
 - [x] Xây dựng giao diện cơ bản
+- [x] Triển khai microservices
+- [x] Kết nối cơ sở dữ liệu
+  - [x] PostgreSQL cho user data
+  - [x] MongoDB Atlas cho messages
+- [x] Cấu hình WebSocket và REST endpoints
+- [x] Service discovery với Eureka
 
 ## Kế Hoạch Mở Rộng
 - Hỗ trợ cuộc gọi âm thanh/video
 - Tích hợp end-to-end encryption
 - Phát triển ứng dụng di động
+- Tối ưu hiệu suất MongoDB Atlas
+- Thêm Redis caching layer
+- Monitoring với Prometheus & Grafana

@@ -5,7 +5,7 @@ spring:
   application:
     name: user-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/chatapp_users
+    url: jdbc:postgresql://localhost:5433/chatapp_users
     username: postgres
     password: postgres
   jpa:
@@ -16,6 +16,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  main:
+    allow-bean-definition-overriding: true
 
 eureka:
   client:

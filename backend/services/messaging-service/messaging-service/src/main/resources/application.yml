@@ -6,7 +6,7 @@ spring:
     name: messaging-service
   data:
     mongodb:
-      uri: mongodb://localhost:27017/chatapp_messages
+      uri: mongodb+srv://mrrdavidd:lrrDHlAcQHFC1dg6@hiep.segu1.mongodb.net/chatapp_messages
   rabbitmq:
     host: localhost
     port: 5672

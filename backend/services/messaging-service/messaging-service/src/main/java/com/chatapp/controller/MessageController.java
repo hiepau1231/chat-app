@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -17,6 +18,11 @@ public class MessageController {
     @MessageMapping("/chat.send")
     public void sendMessage(@Payload Message message, SimpMessageHeaderAccessor headerAccessor) {
         messageService.sendMessage(message);
+    }
+
+    @PostMapping("/api/messages")
+    public ResponseEntity<Message> createMessage(@RequestBody Message message) {
+        return ResponseEntity.ok(messageService.sendMessage(message));
     }
 
     @GetMapping("/api/messages/room/{roomId}")

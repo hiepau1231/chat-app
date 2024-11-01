@@ -18,11 +18,19 @@
   - Messaging Service
 - Thiết lập cơ sở dữ liệu:
   - PostgreSQL cho User Service
-  - MongoDB cho Messaging Service
+  - MongoDB Atlas cho Messaging Service (đã kết nối thành công)
 - Cập nhật và sửa lỗi:
   - Cập nhật JUnit tests từ JUnit 3 lên JUnit 5 cho Service Registry
   - Sửa lỗi compile cho Service Registry tests
   - Khởi động thành công Eureka Server
+- Cấu hình và triển khai Messaging Service:
+  - Kết nối thành công với MongoDB Atlas
+  - Cấu hình WebSocket và REST endpoints
+  - Triển khai các API endpoints cho tin nhắn:
+    * POST /api/messages - Gửi tin nhắn mới
+    * GET /api/messages/room/{roomId} - Lấy tin nhắn của phòng
+    * GET /api/messages/user/{userId} - Lấy tin nhắn của user
+    * DELETE /api/messages/{id} - Xóa tin nhắn
 
 ## Đang Thực Hiện
 - Triển khai các Microservices:
@@ -35,7 +43,7 @@
   - Tối ưu animations
 - Phát triển backend services:
   - Hoàn thiện API endpoints
-  - Cấu hình WebSocket cho real-time messaging
+  - Tích hợp WebSocket cho real-time messaging
   - Tích hợp JWT authentication
 
 ## Các Bước Tiếp Theo
@@ -73,3 +81,4 @@
 - Đảm bảo độ trễ thấp cho real-time messaging
 - Xử lý đồng thời nhiều kết nối WebSocket
 - Caching strategy cho API calls
+- Xử lý lỗi và retry mechanism cho MongoDB Atlas connection

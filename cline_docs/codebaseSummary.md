@@ -16,6 +16,21 @@ chat-app/
 │       ├── api-gateway/         # Spring Cloud Gateway
 │       ├── user-service/        # User management
 │       └── messaging-service/   # Chat functionality
+│           ├── src/main/java/com/chatapp/
+│           │   ├── config/
+│           │   │   └── WebSocketConfig.java
+│           │   ├── controller/
+│           │   │   ├── ChatRoomController.java
+│           │   │   └── MessageController.java
+│           │   ├── model/
+│           │   │   ├── ChatRoom.java
+│           │   │   └── Message.java
+│           │   ├── repository/
+│           │   │   ├── ChatRoomRepository.java
+│           │   │   └── MessageRepository.java
+│           │   └── service/
+│           │       ├── ChatRoomService.java
+│           │       └── MessageService.java
 └── cline_docs/         # Project documentation
 ```
 
@@ -47,9 +62,14 @@ chat-app/
 
 #### Messaging Service
 - Real-time messaging
-- WebSocket
-- MongoDB database
+- WebSocket và REST endpoints
+- MongoDB Atlas integration
 - Port: 8082
+- Chức năng:
+  * Quản lý phòng chat (group/private)
+  * Gửi/nhận tin nhắn real-time
+  * Lưu trữ lịch sử chat
+  * Quản lý thành viên phòng
 
 ## Database Schema
 
@@ -62,18 +82,36 @@ chat-app/
   - Avatar URL
   - Timestamps
 
-### MongoDB (Messaging Service)
+### MongoDB Atlas (Messaging Service)
 - Messages collection
-  - Text/file messages
-  - Sender/receiver info
-  - Room reference
-  - Timestamps
+  ```json
+  {
+    "_id": "ObjectId",
+    "content": "String",
+    "type": "text/image/file",
+    "fileUrl": "String (optional)",
+    "fileName": "String (optional)",
+    "senderId": "String",
+    "receiverId": "String (optional)",
+    "roomId": "String",
+    "createdAt": "DateTime",
+    "updatedAt": "DateTime"
+  }
+  ```
 
 - ChatRooms collection
-  - Group/private chats
-  - Member list
-  - Room settings
-  - Timestamps
+  ```json
+  {
+    "_id": "ObjectId",
+    "name": "String",
+    "isPrivate": "Boolean",
+    "members": ["String (userId)"],
+    "ownerId": "String",
+    "type": "direct/group",
+    "createdAt": "DateTime",
+    "updatedAt": "DateTime"
+  }
+  ```
 
 ## API Endpoints
 
@@ -85,9 +123,26 @@ chat-app/
 
 ### Messaging Service
 - WebSocket: /ws
-- REST:
-  - /api/rooms/* - Room management
-  - /api/messages/* - Message operations
+  - STOMP endpoint: /chat.send
+  - Subscriptions:
+    * /topic/room/{roomId}
+    * /user/{userId}/queue/messages
+
+- REST Endpoints:
+  - Messages:
+    * POST /api/messages - Tạo tin nhắn mới
+    * GET /api/messages/room/{roomId} - Lấy tin nhắn của phòng
+    * GET /api/messages/user/{userId} - Lấy tin nhắn của user
+    * DELETE /api/messages/{id} - Xóa tin nhắn
+
+  - Chat Rooms:
+    * POST /api/rooms - Tạo phòng chat
+    * GET /api/rooms/{id} - Lấy thông tin phòng
+    * GET /api/rooms/user/{userId} - Lấy danh sách phòng của user
+    * PUT /api/rooms/{id} - Cập nhật phòng
+    * DELETE /api/rooms/{id} - Xóa phòng
+    * POST /api/rooms/{roomId}/members/{userId} - Thêm thành viên
+    * DELETE /api/rooms/{roomId}/members/{userId} - Xóa thành viên
 
 ## Dependencies
 ### Frontend
@@ -98,20 +153,23 @@ chat-app/
 ### Backend
 - Spring Boot 3.2.0
 - Spring Cloud 2023.0.0
+- Spring WebSocket
+- Spring Data MongoDB
 - PostgreSQL
-- MongoDB
-- WebSocket
+- MongoDB Atlas
 - JWT
 
 ## Thay Đổi Gần Đây
-- Khởi tạo microservices architecture
-- Cài đặt service registry và API gateway
-- Triển khai user service với PostgreSQL
-- Triển khai messaging service với MongoDB và WebSocket
-- Cấu hình giao tiếp giữa các services
+- Kết nối thành công với MongoDB Atlas
+- Triển khai WebSocket và REST endpoints cho messaging service
+- Cấu hình giao tiếp giữa các services qua Eureka
+- Thêm các API endpoints cho quản lý tin nhắn và phòng chat
+- Cập nhật cấu trúc dữ liệu MongoDB cho messages và chat rooms
 
 ## Kế Hoạch Tiếp Theo
 - Triển khai search service
 - Tích hợp file sharing
 - Cài đặt monitoring
 - Triển khai CI/CD
+- Tối ưu hiệu suất MongoDB Atlas
+- Thêm caching layer với Redis

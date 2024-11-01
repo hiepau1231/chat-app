@@ -25,14 +25,54 @@
 
 ## Backend
 - **API Gateway**: Spring Cloud Gateway
-- **Microservices**: Spring Cloud
-- **Real-time Server**: Socket.IO
+- **Service Registry**: Netflix Eureka Server
+- **Microservices**: 
+  - Spring Boot 3.2.0
+  - Spring Cloud
+  - Spring WebSocket cho real-time messaging
+  - Spring Data MongoDB
+  - Spring Data JPA
+
 - **Authentication**: JWT
 
 ## Cơ Sở Dữ Liệu
-- **Chính**: PostgreSQL
-- **Cache**: Redis
-- **Real-time Data**: MongoDB
+- **User Service**: 
+  - PostgreSQL
+  - Database: chatapp_users
+  - Port: 5433
+
+- **Messaging Service**:
+  - MongoDB Atlas
+  - Connection string: mongodb+srv://<username>:<password>@hiep.segu1.mongodb.net/
+  - Database: chatapp_messages
+  - Collections:
+    * messages: Lưu trữ tin nhắn
+    * chat_rooms: Quản lý phòng chat
+
+- **Cache**: Redis (planned)
+
+## Service Ports
+- Eureka Server: 8761
+- API Gateway: 8080
+- User Service: 8081
+- Messaging Service: 8082
+
+## API Endpoints
+### Messaging Service
+- **Messages**:
+  - POST /api/messages - Tạo tin nhắn mới
+  - GET /api/messages/room/{roomId} - Lấy tin nhắn của phòng
+  - GET /api/messages/user/{userId} - Lấy tin nhắn của user
+  - DELETE /api/messages/{id} - Xóa tin nhắn
+
+- **Chat Rooms**:
+  - POST /api/rooms - Tạo phòng chat mới
+  - GET /api/rooms/{id} - Lấy thông tin phòng
+  - GET /api/rooms/user/{userId} - Lấy danh sách phòng của user
+  - PUT /api/rooms/{id} - Cập nhật thông tin phòng
+  - DELETE /api/rooms/{id} - Xóa phòng
+  - POST /api/rooms/{roomId}/members/{userId} - Thêm thành viên
+  - DELETE /api/rooms/{roomId}/members/{userId} - Xóa thành viên
 
 ## UI/UX Tools
 - **Design System**: 
@@ -53,7 +93,7 @@
 - **Container**: Docker
 - **CI/CD**: GitHub Actions
 - **Monitoring**: Prometheus & Grafana
-- **Testing**: Jest, React Testing Library
+- **Testing**: JUnit 5, React Testing Library
 
 ## Quyết Định Kiến Trúc
 ### Frontend
@@ -64,10 +104,14 @@
 
 ### Backend
 - Microservices architecture cho khả năng mở rộng tốt
-- WebSocket cho giao tiếp thời gian thực
+- Service Registry (Eureka) cho service discovery
+- WebSocket và REST endpoints cho giao tiếp đa dạng
 - JWT cho xác thực bảo mật
 
 ### Database
 - PostgreSQL cho dữ liệu người dùng và xác thực
-- MongoDB cho tin nhắn và dữ liệu real-time
-- Redis cho caching và tối ưu hiệu suất
+- MongoDB Atlas cho tin nhắn và dữ liệu real-time:
+  * Khả năng mở rộng cao
+  * Hỗ trợ tốt cho dữ liệu phi cấu trúc
+  * Tích hợp sẵn sharding và replication
+- Redis cho caching và tối ưu hiệu suất (planned)
