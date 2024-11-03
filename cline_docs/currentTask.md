@@ -1,90 +1,122 @@
 # Nhiệm Vụ Hiện Tại
 
 ## Đã Hoàn Thành
-- Thiết lập cấu trúc dự án cơ bản
-- Tạo tài liệu dự án
-- Cài đặt và cấu hình các công nghệ frontend:
-  - React + Vite
-  - Tailwind CSS
-  - Shadcn UI components
-- Xây dựng giao diện cơ bản giống Telegram:
-  - Layout tổng thể với sidebar và chat area
-  - Thiết kế UI components
-  - Hiệu ứng và animations
-- Khởi tạo backend microservices:
-  - Service Registry (Eureka Server) - đã chạy thành công trên cổng 8761
+- Thiết lập cơ sở hạ tầng microservices cơ bản:
+  - Service Registry (Eureka Server)
   - API Gateway
   - User Service
   - Messaging Service
-- Thiết lập cơ sở dữ liệu:
-  - PostgreSQL cho User Service
-  - MongoDB Atlas cho Messaging Service (đã kết nối thành công)
-- Cập nhật và sửa lỗi:
-  - Cập nhật JUnit tests từ JUnit 3 lên JUnit 5 cho Service Registry
-  - Sửa lỗi compile cho Service Registry tests
-  - Khởi động thành công Eureka Server
-- Cấu hình và triển khai Messaging Service:
-  - Kết nối thành công với MongoDB Atlas
-  - Cấu hình WebSocket và REST endpoints
-  - Triển khai các API endpoints cho tin nhắn:
-    * POST /api/messages - Gửi tin nhắn mới
-    * GET /api/messages/room/{roomId} - Lấy tin nhắn của phòng
-    * GET /api/messages/user/{userId} - Lấy tin nhắn của user
-    * DELETE /api/messages/{id} - Xóa tin nhắn
-- Giải quyết vấn đề LocalDateTime serialization
-- Sửa lỗi tin nhắn bị duplicate trong frontend
+- Kết nối MongoDB Atlas cho Messaging Service
+- Cấu hình WebSocket cơ bản
+- Frontend:
+  - Setup React + Vite
+  - Tạo giao diện gửi tin nhắn cơ bản
 
 ## Đang Thực Hiện
-- Triển khai các Microservices:
-  - Kết nối API Gateway với Eureka Server
-  - Kết nối User Service với Eureka Server
-  - Kết nối Messaging Service với Eureka Server
-- Hoàn thiện các tính năng UI/UX:
-  - Thêm dark mode
-  - Cải thiện responsive design
-  - Tối ưu animations
-- Phát triển backend services:
-  - Hoàn thiện API endpoints
-  - Tối ưu hiệu suất WebSocket cho real-time messaging
-  - Tích hợp JWT authentication
+1. Frontend Development:
+   - Telegram-style UI components:
+     - [ ] ChatArea - hiện chỉ có chức năng gửi tin nhắn
+     - [ ] Sidebar với danh sách chat
+     - [ ] User profile section
+     - [ ] Search functionality
+     - [ ] Emoji reactions
+     - [ ] Reply threads
+     - [ ] Forward message UI
+     - [ ] Pin message UI
+     - [ ] Stickers support
+
+   - Real-time Features:
+     - [ ] Typing indicators
+     - [ ] Online status
+     - [ ] Message status (sent/delivered/read)
+     - [ ] Voice messages
+     - [ ] Video call interface
+
+2. Backend Integration:
+   - Chat Features:
+     - [ ] Complete chat room management
+     - [ ] Message threading
+     - [ ] Message forwarding
+     - [ ] Message pinning
+     - [ ] Message reactions
+   
+   - Media & Calls:
+     - [ ] File sharing service
+     - [ ] Voice message handling
+     - [ ] Video call signaling
+     - [ ] WebRTC integration
+
+   - User Management:
+     - [ ] Authentication system
+     - [ ] User presence tracking
+     - [ ] User settings management
+
+3. Advanced Features:
+   - [ ] End-to-end encryption
+   - [ ] Push notifications
+   - [ ] Message search functionality
+   - [ ] Group chat management
+   - [ ] Voice/Video call infrastructure
 
 ## Các Bước Tiếp Theo
-1. Tối ưu hiệu suất
-   - Implement caching strategy cho API calls
-   - Tối ưu truy vấn database
-   - Cải thiện độ trễ của real-time messaging
+1. Frontend Priority:
+   - Complete Telegram-style UI
+   - Implement WebRTC for calls
+   - Add all message interactions
+   - Enhance real-time features
 
-2. Authentication Flow
-   - Tích hợp JWT authentication
-   - Xây dựng login/register UI
-   - Implement session management
-   - Bảo mật API endpoints
+2. Backend Priority:
+   - Setup WebRTC signaling server
+   - Implement end-to-end encryption
+   - Complete chat room features
+   - Add notification system
 
-3. Tính năng nâng cao
-   - Triển khai file sharing
-   - Thêm tính năng tìm kiếm tin nhắn
-   - Implement notification system
-
-4. Testing & Optimization
-   - Unit tests cho frontend components
-   - Integration tests cho backend services
-   - Performance testing
-   - Security hardening
-
-5. DevOps & Deployment
-   - Cấu hình Docker containers
-   - Thiết lập CI/CD pipeline
-   - Implement monitoring với Prometheus & Grafana
-
-## Liên Kết với Lộ Trình
-- Đã hoàn thành phần "Giao diện UI/UX (Telegram Style)" trong projectRoadmap.md
-- Đã hoàn thành phần cơ bản của "Nhắn tin thời gian thực" trong projectRoadmap.md
-- Đang tiến hành tối ưu hiệu suất và cải thiện trải nghiệm người dùng
-- Chuẩn bị cho việc triển khai hệ thống xác thực và các tính năng nâng cao
+3. Infrastructure:
+   - Setup media storage
+   - Configure push notifications
+   - Implement caching with Redis
+   - Setup monitoring (Prometheus & Grafana)
 
 ## Vấn Đề Cần Giải Quyết
-- Tối ưu hiệu suất giữa các microservices
-- Cải thiện xử lý lỗi và retry mechanism cho các kết nối database
-- Xử lý đồng thời nhiều kết nối WebSocket hiệu quả
-- Implement caching strategy hiệu quả cho API calls
-- Đảm bảo bảo mật cho toàn bộ hệ thống
+1. Technical Challenges:
+   - WebRTC implementation for calls
+   - End-to-end encryption setup
+   - Real-time performance optimization
+   - Media storage and delivery
+
+2. Missing Features:
+   - Video/Voice calls
+   - File sharing
+   - Message search
+   - Push notifications
+   - Stickers and reactions
+
+3. Security & Performance:
+   - End-to-end encryption
+   - Message caching
+   - Media optimization
+   - Connection handling
+
+## Kế Hoạch Mở Rộng
+1. Mobile Support:
+   - React Native application
+   - Push notifications
+   - Mobile-specific optimizations
+
+2. Additional Features:
+   - Group video calls
+   - Screen sharing
+   - Message scheduling
+   - Custom sticker packs
+
+3. Performance Optimization:
+   - Media compression
+   - Lazy loading
+   - Connection pooling
+   - Cache optimization
+
+
+
+
+
+
