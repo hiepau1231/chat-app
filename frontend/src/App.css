@@ -1,42 +1,124 @@
+/* Remove default styles */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Main container */
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Sidebar */
+.sidebar {
+  width: 350px;
+  border-right: 1px solid #e0e0e0;
+  height: 100%;
+  background: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.sidebar-header h1 {
+  margin: 0;
+  font-size: 20px;
+  color: #1a1a1a;
+}
+
+/* Chat container */
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #f5f5f5;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.chat-header h2 {
+  margin: 0;
+  font-size: 18px;
+  flex: 1;
+}
+
+/* Empty state */
+.no-chat-selected {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 16px;
+  background: white;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    display: none;
   }
-  to {
-    transform: rotate(360deg);
+
+  .sidebar.show {
+    display: block;
+  }
+
+  .chat-container {
+    width: 100%;
+    display: flex;
+  }
+
+  .chat-container.hide {
+    display: none;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Add styles for new chat button */
+.new-chat-button {
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.card {
-  padding: 2em;
+.new-chat-button button {
+  width: 100%;
+  padding: 12px;
+  background: #0084ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-.read-the-docs {
-  color: #888;
+.new-chat-button button:hover {
+  background: #0073e6;
 }

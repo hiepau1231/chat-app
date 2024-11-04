@@ -1,11 +1,13 @@
 package com.chatapp.controller;
 
 import com.chatapp.model.ChatRoom;
+import com.chatapp.dto.ChatRoomDTO;
 import com.chatapp.service.ChatRoomService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/rooms")
@@ -13,39 +15,49 @@ import java.util.List;
 public class ChatRoomController {
     private final ChatRoomService chatRoomService;
 
+    @GetMapping
+    public Page<ChatRoomDTO> getRooms(
+            @RequestParam String userId,
+            Pageable pageable) {
+        return chatRoomService.getRoomsForUser(userId, pageable)
+                .map(ChatRoomDTO::fromChatRoom);
+    }
+
+    @GetMapping("/search")
+    public Page<ChatRoomDTO> searchRooms(
+            @RequestParam String userId,
+            @RequestParam String searchTerm,
+            Pageable pageable) {
+        return chatRoomService.searchRooms(userId, searchTerm, pageable)
+                .map(ChatRoomDTO::fromChatRoom);
+    }
+
+    @GetMapping("/{roomId}")
+    public ChatRoomDTO getRoom(@PathVariable String roomId) {
+        return ChatRoomDTO.fromChatRoom(chatRoomService.getRoom(roomId));
+    }
+
     @PostMapping
-    public ResponseEntity<ChatRoom> createRoom(@RequestBody ChatRoom room) {
-        return ResponseEntity.ok(chatRoomService.createRoom(room));
+    public ChatRoomDTO createRoom(@RequestBody ChatRoom room) {
+        return ChatRoomDTO.fromChatRoom(chatRoomService.createRoom(room));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ChatRoom> getRoom(@PathVariable String id) {
-        return ResponseEntity.ok(chatRoomService.getRoom(id));
+    @GetMapping("/{roomId}/unread")
+    public long getUnreadCount(
+            @PathVariable String roomId,
+            @RequestParam String userId) {
+        return chatRoomService.getUnreadCount(roomId, userId);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ChatRoom>> getRoomsByUser(@PathVariable String userId) {
-        return ResponseEntity.ok(chatRoomService.getRoomsByUser(userId));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<ChatRoom> updateRoom(@PathVariable String id, @RequestBody ChatRoom room) {
-        return ResponseEntity.ok(chatRoomService.updateRoom(id, room));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRoom(@PathVariable String id) {
-        chatRoomService.deleteRoom(id);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/{roomId}/members/{userId}")
-    public ResponseEntity<ChatRoom> addMember(@PathVariable String roomId, @PathVariable String userId) {
-        return ResponseEntity.ok(chatRoomService.addMember(roomId, userId));
-    }
-
-    @DeleteMapping("/{roomId}/members/{userId}")
-    public ResponseEntity<ChatRoom> removeMember(@PathVariable String roomId, @PathVariable String userId) {
-        return ResponseEntity.ok(chatRoomService.removeMember(roomId, userId));
+    @PostMapping("/{roomId}/read")
+    public void markAsRead(
+            @PathVariable String roomId,
+            @RequestParam String userId,
+            @RequestParam(required = false) String messageId) {
+        if (messageId != null) {
+            chatRoomService.markAsRead(roomId, userId, messageId);
+        } else {
+            chatRoomService.markRoomAsRead(roomId, userId);
+        }
     }
 }

@@ -1,0 +1,8 @@
+path.config: /usr/share/logstash/pipeline
+path.logs: /var/log/logstash
+pipeline.workers: 2
+pipeline.batch.size: 125
+pipeline.batch.delay: 50
+queue.type: memory
+xpack.monitoring.enabled: true
+xpack.monitoring.elasticsearch.hosts: ["http://elasticsearch:9200"]

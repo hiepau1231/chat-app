@@ -1,0 +1,22 @@
+.message-status {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 12px;
+}
+
+.message-status.sent {
+  color: #a0a0a0;
+}
+
+.message-status.delivered {
+  color: #8c8c8c;
+}
+
+.message-status.read {
+  color: #0084ff;
+}
+
+/* Animation for status changes */
+.message-status {
+  transition: color 0.2s ease;
+} 

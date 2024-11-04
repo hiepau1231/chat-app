@@ -1,0 +1,55 @@
+.message-list {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  overflow-y: auto;
+  height: calc(100vh - 120px); /* Adjust based on your layout */
+}
+
+.message-group {
+  margin-bottom: 24px;
+}
+
+.date-separator {
+  text-align: center;
+  color: #666;
+  font-size: 12px;
+  margin: 16px 0;
+  position: relative;
+}
+
+.date-separator::before,
+.date-separator::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 30%;
+  height: 1px;
+  background-color: #e0e0e0;
+}
+
+.date-separator::before {
+  left: 0;
+}
+
+.date-separator::after {
+  right: 0;
+}
+
+/* Scrollbar styling */
+.message-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.message-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.message-list::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.message-list::-webkit-scrollbar-thumb:hover {
+  background: #555;
+} 

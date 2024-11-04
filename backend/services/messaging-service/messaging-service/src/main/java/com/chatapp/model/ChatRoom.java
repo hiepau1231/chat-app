@@ -1,27 +1,24 @@
 package com.chatapp.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Data
-@Document(collection = "chat_rooms")
+@Document(collection = "chatrooms")
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChatRoom {
     @Id
     private String id;
     private String name;
-    private boolean isPrivate;
-    private Set<String> members = new HashSet<>();
-    private String ownerId;
-    private String type = "group"; // direct, group
+    private List<String> members;
+    private Message lastMessage;
+    private RoomSettings settings;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    public ChatRoom() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
 }

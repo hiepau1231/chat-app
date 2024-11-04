@@ -21,26 +21,74 @@ spring:
         - id: user-service
           uri: lb://user-service
           predicates:
-            - Path=/api/users/**
+            - Path=/api/auth/**, /api/users/**
           filters:
-            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                redis-rate-limiter.requestedTokens: 1
+            - name: CircuitBreaker
+              args:
+                name: userServiceCircuitBreaker
+                fallbackUri: forward:/fallback/user-service
         - id: messaging-service
           uri: lb://messaging-service
           predicates:
-            - Path=/api/messages/**, /api/rooms/**, /ws/**
+            - Path=/api/messages/**, /api/rooms/**
           filters:
-            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
-            - RewritePath=/ws/(?<segment>.*), /ws/$\{segment}
-            - AddResponseHeader=Access-Control-Allow-Origin, http://localhost:5173
-            - AddResponseHeader=Access-Control-Allow-Methods, GET,POST,PUT,DELETE,OPTIONS
-            - AddResponseHeader=Access-Control-Allow-Headers, "*"
-            - AddResponseHeader=Access-Control-Allow-Credentials, true
-        - id: search-service
-          uri: lb://search-service
-          predicates:
-            - Path=/api/search/**
-          filters:
-            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 20
+                redis-rate-limiter.burstCapacity: 40
+                redis-rate-limiter.requestedTokens: 1
+            - name: CircuitBreaker
+              args:
+                name: messagingServiceCircuitBreaker
+                fallbackUri: forward:/fallback/messaging-service
+
+      default-filters:
+        - name: Retry
+          args:
+            retries: 3
+            methods: GET,POST,PUT,DELETE
+            series: SERVER_ERROR
+            exceptions: java.io.IOException,java.util.concurrent.TimeoutException
+        - name: ResponseRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 50
+            redis-rate-limiter.burstCapacity: 100
+
+  redis:
+    host: localhost
+    port: 6379
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000
+        permittedNumberOfCallsInHalfOpenState: 3
+    instances:
+      userServiceCircuitBreaker:
+        baseConfig: default
+      messagingServiceCircuitBreaker:
+        baseConfig: default
+
+  retry:
+    configs:
+      default:
+        maxRetryAttempts: 3
+        waitDuration: 100
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+    instances:
+      userServiceRetry:
+        baseConfig: default
+      messagingServiceRetry:
+        baseConfig: default
 
 eureka:
   client:
@@ -53,7 +101,16 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: health,metrics,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
+  endpoint:
+    health:
+      show-details: always
 
 logging:
   level:
