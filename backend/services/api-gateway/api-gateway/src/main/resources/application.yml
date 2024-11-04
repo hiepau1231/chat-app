@@ -7,7 +7,6 @@ spring:
   cloud:
     gateway:
       globalcors:
-        add-to-simple-url-handler-mapping: true
         corsConfigurations:
           '[/**]':
             allowedOrigins: "http://localhost:5173"
@@ -19,7 +18,6 @@ spring:
               - OPTIONS
             allowedHeaders: "*"
             allowCredentials: true
-            maxAge: 3600
       discovery:
         locator:
           enabled: true
@@ -29,26 +27,10 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/api/auth/**, /api/users/**
-          filters:
-            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
-            - name: CircuitBreaker
-              args:
-                name: userServiceCircuitBreaker
-                fallbackUri: forward:/fallback/user-service
         - id: messaging-service
           uri: lb://messaging-service
           predicates:
             - Path=/api/messages/**, /api/rooms/**
-          filters:
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 20
-                redis-rate-limiter.burstCapacity: 40
-                redis-rate-limiter.requestedTokens: 1
-            - name: CircuitBreaker
-              args:
-                name: messagingServiceCircuitBreaker
-                fallbackUri: forward:/fallback/messaging-service
 
       default-filters:
         - name: Retry
