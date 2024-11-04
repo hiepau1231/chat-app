@@ -1,60 +1,52 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { Link, useNavigate } from 'react-router-dom';
+import { validateEmail, validatePassword } from '../../types/auth';
 import '../../styles/Auth.css';
-
 export const RegisterForm = () => {
   const navigate = useNavigate();
   const { register, loading, error } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
-    username: '',
     password: '',
     confirmPassword: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
     if (!formData.email) {
       newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } else if (!validateEmail(formData.email)) {
       newErrors.email = 'Email is invalid';
     }
-
-    if (!formData.username) {
-      newErrors.username = 'Username is required';
-    }
-
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    } else if (!validatePassword(formData.password)) {
+      newErrors.password = 'Password must be at least 6 characters long and contain at least one digit, one lowercase, one uppercase letter, and one special character';
     }
-
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        await register(formData);
+        await register({
+          email: formData.email,
+          password: formData.password
+        });
         navigate('/login');
-      } catch (error) {
+      } catch (err) {
         setErrors({
-          submit: 'Registration failed. Please try again.'
+          submit: error || 'Registration failed. Please try again.'
         });
       }
     }
   };
-
   return (
     <div className="auth-container">
       <form onSubmit={handleSubmit} className="auth-form">
@@ -62,7 +54,6 @@ export const RegisterForm = () => {
           <h1>Create Account</h1>
           <p>Please fill in the form to continue</p>
         </div>
-
         <div className="form-group">
           <label htmlFor="email">Email</label>
           <input
@@ -75,20 +66,6 @@ export const RegisterForm = () => {
           />
           {errors.email && <span className="error-message">{errors.email}</span>}
         </div>
-
-        <div className="form-group">
-          <label htmlFor="username">Username</label>
-          <input
-            id="username"
-            type="text"
-            value={formData.username}
-            onChange={e => setFormData({...formData, username: e.target.value})}
-            className={errors.username ? 'error' : ''}
-            placeholder="Choose a username"
-          />
-          {errors.username && <span className="error-message">{errors.username}</span>}
-        </div>
-
         <div className="form-group">
           <label htmlFor="password">Password</label>
           <input
@@ -101,7 +78,6 @@ export const RegisterForm = () => {
           />
           {errors.password && <span className="error-message">{errors.password}</span>}
         </div>
-
         <div className="form-group">
           <label htmlFor="confirmPassword">Confirm Password</label>
           <input
@@ -114,9 +90,7 @@ export const RegisterForm = () => {
           />
           {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
         </div>
-
         {errors.submit && <div className="error-message">{errors.submit}</div>}
-
         <button 
           type="submit" 
           className="auth-button"
@@ -124,7 +98,6 @@ export const RegisterForm = () => {
         >
           {loading ? 'Creating Account...' : 'Create Account'}
         </button>
-
         <div className="auth-links">
           <span>Already have an account? </span>
           <Link to="/login">Sign in</Link>
@@ -132,4 +105,4 @@ export const RegisterForm = () => {
       </form>
     </div>
   );
-}; 
+};

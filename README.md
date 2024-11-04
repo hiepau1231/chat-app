@@ -1,144 +1,126 @@
-# Ứng Dụng Chat Realtime
+# Chat Application
 
-## Giới Thiệu
-Ứng dụng chat realtime với giao diện giống Telegram, được xây dựng bằng React và Spring Cloud Microservices.
+A real-time chat application built with Spring Boot microservices and React.
 
-## Yêu Cầu Hệ Thống
-- Java Development Kit (JDK) 17 trở lên
-- Node.js 18 trở lên
-- PostgreSQL 15 trở lên
-- MongoDB 6 trở lên
-- RabbitMQ (tùy chọn, cho message broker)
+## Features
 
-## Cấu Trúc Dự Án
-```
-chat-app/
-├── frontend/            # Ứng dụng React
-├── backend/services/    # Microservices
-│   ├── service-registry/    # Eureka Server
-│   ├── api-gateway/         # API Gateway
-│   ├── user-service/        # Quản lý người dùng
-│   └── messaging-service/   # Chức năng chat
-└── cline_docs/         # Tài liệu dự án
-```
+### Implemented
+- User registration and authentication with JWT
+- Token refresh mechanism
+- Basic authorization
+- WebSocket messaging
+- Microservices architecture
 
-## Cài Đặt và Chạy
+### Coming Soon
+- Email verification
+- Password reset
+- Real-time chat
+- File sharing
+- User profiles
 
-### 1. Cài Đặt Database
-- PostgreSQL:
-  ```sql
-  CREATE DATABASE chatapp_users;
-  ```
-- MongoDB:
-  ```bash
-  use chatapp_messages
-  ```
+## Technology Stack
 
-### 2. Backend Services
+### Backend
+- Java 17
+- Spring Boot 3.2.0
+- Spring Security with JWT
+- Spring WebSocket
+- PostgreSQL
+- MongoDB
+- Netflix Eureka for Service Discovery
 
-#### Service Registry (Eureka Server)
+### Frontend
+- React 18
+- Vite
+- TypeScript
+- Tailwind CSS
+
+### Monitoring
+- Grafana
+- Prometheus
+
+## Services
+
+1. User Service (Port: 8081)
+   - User management
+   - Authentication
+   - Authorization
+
+2. Messaging Service (Port: 8082)
+   - Real-time messaging
+   - Message history
+   - Chat room management
+
+3. API Gateway (Port: 8080)
+   - Request routing
+   - Load balancing
+   - Security
+
+4. Service Registry (Port: 8761)
+   - Service discovery
+   - Load balancing
+
+## Getting Started
+
+### Prerequisites
+- Java 17
+- Node.js 16+
+- PostgreSQL
+- MongoDB
+- Docker (optional)
+
+### Running the Application
+
+1. Start the databases:
 ```bash
-cd backend/services/service-registry/service-registry
+# PostgreSQL should be running on port 5433
+# MongoDB should be running on port 27017
+```
+
+2. Start the backend services:
+```bash
+# Start Service Registry first
+cd backend/services/service-registry
+mvn spring-boot:run
+
+# Start User Service
+cd backend/services/user-service
+mvn spring-boot:run
+
+# Start Messaging Service
+cd backend/services/messaging-service
+mvn spring-boot:run
+
+# Start API Gateway
+cd backend/services/api-gateway
 mvn spring-boot:run
 ```
-- Truy cập: http://localhost:8761
 
-#### API Gateway
-```bash
-cd backend/services/api-gateway/api-gateway
-mvn spring-boot:run
-```
-- Cổng: 8080
-
-#### User Service
-```bash
-cd backend/services/user-service/user-service
-mvn spring-boot:run
-```
-- Cổng: 8081
-
-#### Messaging Service
-```bash
-cd backend/services/messaging-service/messaging-service
-mvn spring-boot:run
-```
-- Cổng: 8082
-
-### 3. Frontend
+3. Start the frontend:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-- Truy cập: http://localhost:5173
 
-## API Endpoints
+## API Documentation
 
-### User Service
-- Đăng ký: `POST /api/users`
-  ```json
-  {
-    "username": "example",
-    "email": "example@email.com",
-    "password": "password123"
-  }
-  ```
-- Lấy thông tin user: `GET /api/users/{id}`
-- Cập nhật user: `PUT /api/users/{id}`
-- Xóa user: `DELETE /api/users/{id}`
+### Authentication Endpoints
+```
+POST /api/auth/register - Register new user
+POST /api/auth/login - User login
+POST /api/auth/refresh - Refresh access token
+```
 
-### Messaging Service
-- WebSocket endpoint: `ws://localhost:8082/ws`
-- Tạo phòng chat: `POST /api/rooms`
-  ```json
-  {
-    "name": "Room Name",
-    "isPrivate": false,
-    "members": ["userId1", "userId2"]
-  }
-  ```
-- Lấy tin nhắn phòng: `GET /api/messages/room/{roomId}`
-- Gửi tin nhắn: Kết nối WebSocket và gửi đến `/app/chat.send`
-  ```json
-  {
-    "content": "Hello!",
-    "senderId": "userId",
-    "roomId": "roomId"
-  }
-  ```
+### User Endpoints
+```
+GET /api/users/me - Get current user
+GET /api/users/{id} - Get user by ID
+GET /api/users/email/{email} - Get user by email
+```
 
-## Tính Năng Chính
-1. Đăng ký và đăng nhập
-2. Chat realtime
-3. Tạo phòng chat nhóm
-4. Chat riêng tư
-5. Gửi file và hình ảnh (đang phát triển)
+## Contributing
+Please read CONTRIBUTING.md for details on our code of conduct and the process for submitting pull requests.
 
-## Lưu Ý
-- Đảm bảo tất cả các services đều đang chạy trước khi sử dụng frontend
-- Service Registry phải được khởi động đầu tiên
-- Kiểm tra kết nối database trước khi chạy user-service và messaging-service
-
-## Xử Lý Lỗi Thường Gặp
-1. Lỗi kết nối database:
-   - Kiểm tra thông tin kết nối trong application.yml
-   - Đảm bảo database đang chạy
-
-2. Lỗi port đã được sử dụng:
-   - Kiểm tra và tắt các ứng dụng đang sử dụng port
-   - Có thể thay đổi port trong application.yml
-
-3. Lỗi WebSocket:
-   - Kiểm tra CORS configuration
-   - Đảm bảo messaging-service đang chạy
-
-## Đóng Góp
-Mọi đóng góp đều được chào đón. Vui lòng:
-1. Fork dự án
-2. Tạo branch mới
-3. Commit changes
-4. Tạo pull request
-
-## Liên Hệ
-- Email: example@email.com
-- GitHub: github.com/yourusername
+## License
+This project is licensed under the MIT License - see the LICENSE.md file for details

@@ -4,59 +4,54 @@ import com.chatapp.model.User;
 import com.chatapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
+import org.springframework.context.annotation.Lazy;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
+    @Lazy
     private final PasswordEncoder passwordEncoder;
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    @Transactional
     public User createUser(User user) {
-        if (userRepository.existsByUsername(user.getUsername())) {
-            throw new RuntimeException("Username already exists");
-        }
-        if (userRepository.existsByEmail(user.getEmail())) {
+        // Validate unique email
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
 
+        // Encode password
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        
         return userRepository.save(user);
     }
 
-    public User getUserById(String id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public Optional<User> getUserById(UUID id) {
+        return userRepository.findById(id);
     }
 
-    public User getUserByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
-    @Transactional
-    public User updateUser(String id, User userDetails) {
-        User user = getUserById(id);
-        user.setUsername(userDetails.getUsername());
-        user.setEmail(userDetails.getEmail());
-        if (userDetails.getAvatar() != null) {
-            user.setAvatar(userDetails.getAvatar());
-        }
-        return userRepository.save(user);
+    public Map<String, Object> getUserProfile(User user) {
+        return Map.of(
+            "id", user.getId(),
+            "email", user.getEmail(),
+            "role", user.getRole()
+        );
     }
 
-    @Transactional
-    public void deleteUser(String id) {
-        if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User not found");
-        }
-        userRepository.deleteById(id);
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByEmail(username)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
     }
 }

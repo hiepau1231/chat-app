@@ -1,46 +1,46 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../store';
-import { login as loginAction, register as registerAction, logout as logoutAction } from '../store/slices/authSlice';
-import { LoginCredentials, RegisterData } from '../types/user';
-import { ApiError } from '../types/error';
-
+import { useState } from 'react';
+import axios from 'axios';
+import { RegisterRequest, AuthResponse } from '../types/auth';
 export const useAuth = () => {
-  const dispatch = useDispatch();
-  const auth = useSelector((state: RootState) => state.auth);
-
-  const login = async (credentials: LoginCredentials) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const register = async (data: RegisterRequest) => {
+    setLoading(true);
+    setError(null);
     try {
-      await dispatch(loginAction(credentials)).unwrap();
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
+      const response = await axios.post<AuthResponse>(
+        'http://localhost:8080/api/auth/register',
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          withCredentials: true
+        }
+      );
+      console.log('Registration response:', response);
+      return response.data;
+    } catch (err: any) {
+      console.error('Registration error:', err);
+      if (err.response) {
+        console.error('Error response:', err.response.data);
+        console.error('Error status:', err.response.status);
+        console.error('Error headers:', err.response.headers);
+      } else if (err.request) {
+        console.error('Error request:', err.request);
+      } else {
+        console.error('Error message:', err.message);
       }
-      throw new ApiError(500, 'LOGIN_FAILED', 'Failed to login. Please try again.');
+      setError(
+        err.response?.data?.message || 
+        err.message ||
+        'Registration failed. Please try again.'
+      );
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
-
-  const register = async (userData: RegisterData) => {
-    try {
-      await dispatch(registerAction(userData)).unwrap();
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'REGISTRATION_FAILED', 'Failed to register. Please try again.');
-    }
-  };
-
-  const logout = () => {
-    dispatch(logoutAction());
-  };
-
-  return {
-    user: auth.user,
-    token: auth.token,
-    loading: auth.loading,
-    error: auth.error,
-    login,
-    register,
-    logout
-  };
-}; 
+  return { register, loading, error };
+};

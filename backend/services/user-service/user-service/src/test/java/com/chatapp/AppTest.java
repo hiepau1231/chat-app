@@ -1,18 +1,11 @@
 package com.chatapp;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import org.springframework.boot.test.context.SpringBootTest;
 
-/**
- * Unit test for simple App.
- */
-public class AppTest {
-    
-    /**
-     * Rigorous Test :-)
-     */
+@SpringBootTest
+class AppTest {
     @Test
-    public void testApp() {
-        assertTrue(true);
+    void contextLoads() {
     }
 }
