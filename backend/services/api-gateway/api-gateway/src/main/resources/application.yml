@@ -10,14 +10,10 @@ spring:
         corsConfigurations:
           '[/**]':
             allowedOrigins: "http://localhost:5173"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
+            allowedMethods: GET,POST,PUT,DELETE,OPTIONS
             allowedHeaders: "*"
             allowCredentials: true
+            exposedHeaders: "Authorization"
       discovery:
         locator:
           enabled: true
@@ -26,11 +22,15 @@ spring:
         - id: user-service
           uri: lb://user-service
           predicates:
-            - Path=/api/auth/**, /api/users/**
+            - Path=/api/users/**, /api/auth/**
+          filters:
+            - StripPrefix=0
         - id: messaging-service
           uri: lb://messaging-service
           predicates:
             - Path=/api/messages/**, /api/rooms/**
+          filters:
+            - StripPrefix=0
 
       default-filters:
         - name: Retry
@@ -103,6 +103,7 @@ management:
 
 logging:
   level:
+    org.springframework.security: DEBUG
     org.springframework.cloud.gateway: DEBUG
     org.springframework.web.cors: DEBUG
     reactor.netty.http.server: DEBUG

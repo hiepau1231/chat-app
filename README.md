@@ -77,22 +77,22 @@ A real-time chat application built with Spring Boot microservices and React.
 # MongoDB should be running on port 27017
 ```
 
-2. Start the backend services:
+2. Start the backend services in the following order:
 ```bash
-# Start Service Registry first
-cd backend/services/service-registry
+# 1. Start Service Registry first
+cd backend/services/service-registry/service-registry
 mvn spring-boot:run
 
-# Start User Service
-cd backend/services/user-service
+# 2. Start User Service
+cd backend/services/user-service/user-service
 mvn spring-boot:run
 
-# Start Messaging Service
-cd backend/services/messaging-service
+# 3. Start Messaging Service
+cd backend/services/messaging-service/messaging-service
 mvn spring-boot:run
 
-# Start API Gateway
-cd backend/services/api-gateway
+# 4. Start API Gateway
+cd backend/services/api-gateway/api-gateway
 mvn spring-boot:run
 ```
 

@@ -12,8 +12,11 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.util.AntPathMatcher;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -21,6 +24,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserService userService;
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+    private final List<String> publicPaths = Arrays.asList(
+        "/api/auth/register",
+        "/api/auth/login",
+        "/api/auth/refresh"
+    );
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return publicPaths.stream()
+            .anyMatch(path -> pathMatcher.match(path, request.getServletPath()));
+    }
 
     @Override
     protected void doFilterInternal(
@@ -51,4 +67,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         
         filterChain.doFilter(request, response);
     }
-} 
+}

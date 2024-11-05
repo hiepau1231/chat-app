@@ -1,7 +1,10 @@
 package com.chatapp.service;
 
+import com.chatapp.dto.RegisterRequest;
+import com.chatapp.dto.UserResponse;
 import com.chatapp.model.User;
 import com.chatapp.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,19 +24,43 @@ public class UserService implements UserDetailsService {
     @Lazy
     private final PasswordEncoder passwordEncoder;
 
+    public UserResponse registerUser(RegisterRequest request) {
+        // Kiểm tra username đã tồn tại
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new RuntimeException("Username is already taken");
+        }
+        
+        // Kiểm tra email đã tồn tại
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email is already registered");
+        }
+        
+        // Tạo user mới
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        
+        // Lưu user
+        User savedUser = userRepository.save(user);
+        
+        // Chuyển đổi sang response
+        return UserResponse.builder()
+            .id(savedUser.getId())
+            .username(savedUser.getUsername())
+            .email(savedUser.getEmail())
+            .build();
+    }
+
     public User createUser(User user) {
-        // Validate unique email
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
-
-        // Encode password
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        
         return userRepository.save(user);
     }
 
-    public Optional<User> getUserById(UUID id) {
+    public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }
 
@@ -45,7 +72,7 @@ public class UserService implements UserDetailsService {
         return Map.of(
             "id", user.getId(),
             "email", user.getEmail(),
-            "role", user.getRole()
+            "username", user.getUsername()
         );
     }
 
