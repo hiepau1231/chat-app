@@ -28,9 +28,11 @@ spring:
               - Accept
               - X-Requested-With
               - Origin
+              - Cookie
             allowCredentials: true
             exposedHeaders:
               - Authorization
+              - Set-Cookie
       routes:
         - id: user-service
           uri: lb://user-service
@@ -38,10 +40,11 @@ spring:
             - Path=/api/auth/**, /api/users/**
           filters:
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
-            - RemoveRequestHeader=Cookie
             - PreserveHostHeader
             - AddResponseHeader=Access-Control-Allow-Origin, http://localhost:5173
             - AddResponseHeader=Access-Control-Allow-Credentials, true
+            - AddResponseHeader=Access-Control-Allow-Headers, Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie
+            - AddResponseHeader=Access-Control-Expose-Headers, Set-Cookie
 
         - id: messaging-service
           uri: lb://messaging-service
@@ -49,10 +52,11 @@ spring:
             - Path=/api/messages/**
           filters:
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
-            - RemoveRequestHeader=Cookie
             - PreserveHostHeader
             - AddResponseHeader=Access-Control-Allow-Origin, http://localhost:5173
             - AddResponseHeader=Access-Control-Allow-Credentials, true
+            - AddResponseHeader=Access-Control-Allow-Headers, Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie
+            - AddResponseHeader=Access-Control-Expose-Headers, Set-Cookie
 
 eureka:
   client:

@@ -49,11 +49,14 @@ export const LoginForm = () => {
     setLoginStatus('loading');
 
     try {
-      const response = await fetch('http://localhost:8081/api/auth/login', {
+      const response = await fetch('http://localhost:8080/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Origin': 'http://localhost:5173'
         },
+        credentials: 'include',
         body: JSON.stringify(formData)
       });
 
@@ -71,7 +74,12 @@ export const LoginForm = () => {
         username: data.user?.username,
       };
 
+      // Store both tokens
       await login(data.accessToken, userData);
+      if (data.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+      }
+      
       navigate('/', { replace: true });
 
     } catch (err) {
@@ -183,4 +191,4 @@ export const LoginForm = () => {
       </div>
     </div>
   );
-}; 
+};

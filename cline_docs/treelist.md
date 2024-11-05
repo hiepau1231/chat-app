@@ -12,15 +12,19 @@ backend\services\api-gateway\api-gateway\[Help
 backend\services\api-gateway\api-gateway\pom.xml
 backend\services\api-gateway\api-gateway\src\main\java\com\chatapp\ApiGatewayApplication.java
 backend\services\api-gateway\api-gateway\src\main\java\com\chatapp\App.java
-backend\services\api-gateway\api-gateway\src\main\java\com\chatapp\config\SecurityConfig.java
+backend\services\api-gateway\api-gateway\src\main\java\com\chatapp\config\CorsConfig.java
+backend\services\api-gateway\api-gateway\src\main\java\com\chatapp\config\GatewaySecurityConfig.java
 backend\services\api-gateway\api-gateway\src\main\java\com\chatapp\config\WebClientConfig.java
 backend\services\api-gateway\api-gateway\src\main\java\com\chatapp\controller\FallbackController.java
+backend\services\api-gateway\api-gateway\src\main\java\com\chatapp\filter\JwtAuthenticationFilter.java
 backend\services\api-gateway\api-gateway\src\main\resources\application.yml
 backend\services\api-gateway\api-gateway\src\main\resources\logback-spring.xml
 backend\services\api-gateway\api-gateway\src\test\java\com\chatapp\AppTest.java
 backend\services\messaging-service\messaging-service\pom.xml
 backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\App.java
 backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\config\JacksonConfig.java
+backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\config\SecurityConfig.java
+backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\config\WebConfig.java
 backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\config\WebSocketConfig.java
 backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\controller\ChatRoomController.java
 backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\controller\ChatWebSocketController.java
@@ -28,7 +32,9 @@ backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\c
 backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\controller\RoomSettingsController.java
 backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\dto\ChatRoomDTO.java
 backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\event\MessageSentEvent.java
+backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\event\WebSocketEventListener.java
 backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\exception\ResourceNotFoundException.java
+backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\filter\JwtAuthenticationFilter.java
 backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\MessagingServiceApplication.java
 backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\model\ChatRoom.java
 backend\services\messaging-service\messaging-service\src\main\java\com\chatapp\model\LastRead.java
@@ -90,6 +96,7 @@ backend\services\user-service\user-service\src\main\java\com\chatapp\UserService
 backend\services\user-service\user-service\src\main\resources\application.yml
 backend\services\user-service\user-service\src\test\java\com\chatapp\AppTest.java
 cline_docs\currentTask.md
+cline_docs\treelist.md
 frontend\.gitignore
 frontend\components.json
 frontend\eslint.config.js
@@ -167,4 +174,6 @@ frontend\tsconfig.json
 frontend\tsconfig.node.json
 frontend\vite.config.ts
 instruction.md
+package.json
+package-lock.json
 README.md
