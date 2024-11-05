@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -70,19 +71,19 @@ public class AuthenticationService {
                 .build();
     }
 
-    public AuthResponse refreshToken(RefreshTokenRequest request) {
-        String userEmail = jwtService.extractUsername(request.getRefreshToken());
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new AuthenticationException("User not found"));
-
-        if (jwtService.isTokenValid(request.getRefreshToken(), user)) {
-            var accessToken = jwtService.generateToken(user);
+    public AuthResponse refreshToken(String refreshToken) {
+        String email = jwtService.extractUsername(refreshToken);
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        
+        if (jwtService.isTokenValid(refreshToken, user)) {
+            String accessToken = jwtService.generateToken(user);
             return AuthResponse.builder()
-                    .accessToken(accessToken)
-                    .refreshToken(request.getRefreshToken())
-                    .user(mapToUserResponse(user))
-                    .build();
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .user(mapToUserResponse(user))
+                .build();
         }
-        throw new AuthenticationException("Invalid refresh token");
+        throw new RuntimeException("Invalid refresh token");
     }
 } 

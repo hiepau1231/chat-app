@@ -5,9 +5,11 @@ import com.chatapp.dto.AuthResponse;
 import com.chatapp.dto.RegisterRequest;
 import com.chatapp.dto.UserResponse;
 import com.chatapp.dto.ApiResponse;
+import com.chatapp.dto.RefreshTokenRequest;
 import com.chatapp.service.AuthenticationService;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -41,7 +43,28 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> authenticate(@RequestBody AuthRequest request) {
-        AuthResponse response = authenticationService.authenticate(request);
-        return ResponseEntity.ok(response);
+        log.debug("Login attempt for email: {}", request.getEmail());
+        try {
+            AuthResponse response = authenticationService.authenticate(request);
+            log.debug("Login successful for email: {}", request.getEmail());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Login failed for email: {}, error: {}", request.getEmail(), e.getMessage());
+            throw e;
+        }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
+        try {
+            log.debug("Attempting to refresh token");
+            AuthResponse response = authenticationService.refreshToken(request.getRefreshToken());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error refreshing token: {}", e.getMessage());
+            return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiResponse(false, "Invalid refresh token"));
+        }
     }
 }

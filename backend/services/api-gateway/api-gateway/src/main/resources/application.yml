@@ -5,58 +5,31 @@ spring:
   main:
     allow-bean-definition-overriding: true
   application:
-    name: api-gateway
+    name: API-GATEWAY
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
           lower-case-service-id: true
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins: "http://localhost:5173"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders:
-              - Authorization
-              - Content-Type
-              - Accept
-              - X-Requested-With
-              - Origin
-              - Cookie
-            allowCredentials: true
-            exposedHeaders:
-              - Authorization
-              - Set-Cookie
       routes:
         - id: user-service
-          uri: lb://user-service
+          uri: lb://USER-SERVICE
           predicates:
             - Path=/api/auth/**, /api/users/**
           filters:
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
             - PreserveHostHeader
-            - AddResponseHeader=Access-Control-Allow-Origin, http://localhost:5173
-            - AddResponseHeader=Access-Control-Allow-Credentials, true
-            - AddResponseHeader=Access-Control-Allow-Headers, Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie
-            - AddResponseHeader=Access-Control-Expose-Headers, Set-Cookie
+            - AddRequestHeader=Authorization, ${#request.headers['Authorization']}
 
         - id: messaging-service
-          uri: lb://messaging-service
+          uri: lb://MESSAGING-SERVICE
           predicates:
-            - Path=/api/messages/**
+            - Path=/api/messages/**, /api/chat-rooms/**, /ws/**
           filters:
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
             - PreserveHostHeader
-            - AddResponseHeader=Access-Control-Allow-Origin, http://localhost:5173
-            - AddResponseHeader=Access-Control-Allow-Credentials, true
-            - AddResponseHeader=Access-Control-Allow-Headers, Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie
-            - AddResponseHeader=Access-Control-Expose-Headers, Set-Cookie
+            - AddRequestHeader=Authorization, ${#request.headers['Authorization']}
 
 eureka:
   client:
@@ -66,8 +39,9 @@ eureka:
     register-with-eureka: true
   instance:
     prefer-ip-address: true
-    lease-renewal-interval-in-seconds: 10
-    lease-expiration-duration-in-seconds: 30
+
+jwt:
+  secret: your_jwt_secret_key_here_make_it_long_and_secure_at_least_256_bits
 
 management:
   endpoints:
@@ -78,26 +52,7 @@ management:
     health:
       show-details: always
 
-resilience4j:
-  circuitbreaker:
-    instances:
-      userService:
-        slidingWindowSize: 10
-        permittedNumberOfCallsInHalfOpenState: 3
-        failureRateThreshold: 50
-        waitDurationInOpenState: 5000
-      messagingService:
-        slidingWindowSize: 10
-        permittedNumberOfCallsInHalfOpenState: 3
-        failureRateThreshold: 50
-        waitDurationInOpenState: 5000
-
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     reactor.netty: DEBUG
-    org.springframework.security: DEBUG
-    org.springframework.web: DEBUG
-
-jwt:
-  secret: your_jwt_secret_key_here_make_it_long_and_secure_at_least_256_bits
