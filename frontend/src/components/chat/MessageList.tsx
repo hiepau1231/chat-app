@@ -1,109 +1,86 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../hooks/useAuth';
+import { chatApi } from '../../services/api';
+import { ApiError } from '../../types/error';
 import { Message } from './Message';
-import { TypingIndicator } from './TypingIndicator';
-import { webSocketService } from '../../services/WebSocketService';
-import '../../styles/components/MessageList.css';
-
-interface MessageData {
-  id: string;
-  content: string;
-  senderId: string;
-  timestamp: string;
-  status?: 'SENT' | 'DELIVERED' | 'READ';
-}
 
 interface MessageListProps {
-  messages: MessageData[];
-  currentUserId: string;
-  roomId: string;
-  users: Map<string, string>; // userId -> username mapping
+  roomId?: string;
 }
 
-export const MessageList: React.FC<MessageListProps> = ({
-  messages,
-  currentUserId,
-  roomId,
-  users
-}) => {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [typingUsers, setTypingUsers] = React.useState<Set<string>>(new Set());
-  const [messageStatuses, setMessageStatuses] = React.useState<Map<string, string>>(new Map());
-
-  // Scroll to bottom when new messages arrive
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+export const MessageList: React.FC<MessageListProps> = ({ roomId }) => {
+  const [messages, setMessages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  // Subscribe to typing status updates
-  useEffect(() => {
-    const typingSubscription = webSocketService.getTypingStatus(roomId)
-      .subscribe(statusMap => {
-        const roomTyping = statusMap.get(roomId) || new Set();
-        setTypingUsers(roomTyping);
-      });
-
-    // Subscribe to message status updates
-    const statusSubscription = webSocketService.getMessageStatusUpdates()
-      .subscribe(statusMap => {
-        const newStatuses = new Map<string, string>();
-        statusMap.forEach((status, messageId) => {
-          newStatuses.set(messageId, status.status);
-        });
-        setMessageStatuses(newStatuses);
-      });
-
-    return () => {
-      typingSubscription.unsubscribe();
-      statusSubscription.unsubscribe();
+    const fetchMessages = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = roomId 
+          ? await chatApi.getMessages(roomId, { limit: 50 })
+          : await chatApi.getAllMessages();
+        setMessages(data);
+      } catch (err) {
+        console.error('Error fetching messages:', err);
+        if (err instanceof ApiError) {
+          setError(err.message);
+        } else {
+          setError('Failed to load messages. Please try again.');
+        }
+      } finally {
+        setLoading(false);
+      }
     };
+
+    fetchMessages();
   }, [roomId]);
 
-  // Group messages by date
-  const groupMessagesByDate = (messages: MessageData[]) => {
-    const groups = new Map<string, MessageData[]>();
-    
-    messages.forEach(message => {
-      const date = new Date(message.timestamp).toLocaleDateString();
-      const group = groups.get(date) || [];
-      group.push(message);
-      groups.set(date, group);
-    });
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
-    return groups;
-  };
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-red-500 text-center">
+          <p>{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-2 px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  const messageGroups = groupMessagesByDate(messages);
+  if (!messages.length) {
+    return (
+      <div className="flex items-center justify-center h-full text-gray-500">
+        No messages yet
+      </div>
+    );
+  }
 
   return (
-    <div className="message-list">
-      {Array.from(messageGroups.entries()).map(([date, groupMessages]) => (
-        <div key={date} className="message-group">
-          <div className="date-separator">{date}</div>
-          {groupMessages.map(message => (
-            <Message
-              key={message.id}
-              id={message.id}
-              content={message.content}
-              senderId={message.senderId}
-              currentUserId={currentUserId}
-              timestamp={message.timestamp}
-              status={messageStatuses.get(message.id) as 'SENT' | 'DELIVERED' | 'READ' | undefined}
-            />
-          ))}
-        </div>
-      ))}
-      
-      {typingUsers.size > 0 && (
-        <TypingIndicator
-          roomId={roomId}
-          users={users}
+    <div className="flex flex-col space-y-4 p-4 overflow-y-auto h-full">
+      {messages.map((message) => (
+        <Message
+          key={message.id}
+          message={message}
+          isOwnMessage={message.userId === user?.id}
         />
-      )}
-      <div ref={messagesEndRef} />
+      ))}
     </div>
   );
-}; 
+};
+
+export default MessageList;

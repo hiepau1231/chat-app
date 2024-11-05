@@ -1,15 +1,17 @@
 package com.chatapp.event;
 
 import com.chatapp.model.Message;
-import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
-@Getter
 public class MessageSentEvent extends ApplicationEvent {
     private final Message message;
 
-    public MessageSentEvent(Message message) {
-        super(message);
+    public MessageSentEvent(Object source, Message message) {
+        super(source);
         this.message = message;
     }
-} 
+
+    public Message getMessage() {
+        return message;
+    }
+}

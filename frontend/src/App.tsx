@@ -1,47 +1,29 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { RegisterForm } from './components/auth/RegisterForm';
+import { AuthProvider } from './contexts/AuthContext';
 import { LoginForm } from './components/auth/LoginForm';
-import { Home } from './pages/Home';
+import { RegisterForm } from './components/auth/RegisterForm';
+import { ChatLayout } from './components/layout/ChatLayout';
+import { PrivateRoute } from './components/common/PrivateRoute';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('token');
-      setIsAuthenticated(!!token);
-    };
-
-    checkAuth();
-    window.addEventListener('storage', checkAuth);
-
-    return () => {
-      window.removeEventListener('storage', checkAuth);
-    };
-  }, []);
-
-  if (isAuthenticated === null) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <Router>
-      <Routes>
-        <Route 
-          path="/" 
-          element={isAuthenticated ? <Home /> : <Navigate to="/login" replace />} 
-        />
-        <Route 
-          path="/register" 
-          element={isAuthenticated ? <Navigate to="/" replace /> : <RegisterForm />} 
-        />
-        <Route 
-          path="/login" 
-          element={isAuthenticated ? <Navigate to="/" replace /> : <LoginForm />} 
-        />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/register" element={<RegisterForm />} />
+          <Route 
+            path="/" 
+            element={
+              <PrivateRoute>
+                <ChatLayout />
+              </PrivateRoute>
+            } 
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

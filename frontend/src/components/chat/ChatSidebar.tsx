@@ -1,37 +1,52 @@
 import React from 'react';
 import { ChatRoomList } from './ChatRoomList';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { UserStatusIndicator } from '../user/UserStatusIndicator';
 
 export const ChatSidebar = () => {
-  const navigate = useNavigate();
-  const username = "User"; // TODO: Lấy từ user profile
-
-  const handleLogout = () => {
-    localStorage.clear(); // Xóa tất cả localStorage thay vì chỉ xóa token
-    navigate('/login', { replace: true }); // Thêm replace: true để tránh quay lại trang trước đó
-  };
+  const { user } = useAuth();
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
+    <div className="h-full flex flex-col">
+      {/* User Profile Section */}
       <div className="p-4 border-b">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Chat</h2>
-          <div className="flex items-center space-x-2">
-            <span>{username}</span>
-            <button 
-              onClick={handleLogout}
-              className="text-sm text-red-500 hover:text-red-700"
-            >
-              Logout
-            </button>
+        <div className="flex items-center space-x-3">
+          <div className="relative">
+            <img
+              src={user?.avatar || 'https://via.placeholder.com/40'} 
+              alt="Profile"
+              className="w-10 h-10 rounded-full"
+            />
+            <UserStatusIndicator status="online" />
+          </div>
+          <div>
+            <h3 className="font-medium">{user?.username}</h3>
+            <p className="text-sm text-gray-500">{user?.email}</p>
           </div>
         </div>
       </div>
 
-      {/* Chat room list */}
+      {/* Search Bar */}
+      <div className="p-4 border-b">
+        <input
+          type="text"
+          placeholder="Search chats..."
+          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+      </div>
+
+      {/* Chat Rooms List */}
       <div className="flex-1 overflow-y-auto">
-        <ChatRoomList currentUserId="user123" onRoomSelect={() => {}} isLoading={false} />
+        <ChatRoomList />
+      </div>
+
+      {/* New Chat Button */}
+      <div className="p-4 border-t">
+        <button
+          className="w-full py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          New Chat
+        </button>
       </div>
     </div>
   );

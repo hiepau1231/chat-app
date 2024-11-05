@@ -5,6 +5,7 @@ import com.chatapp.model.ChatRoom;
 import com.chatapp.model.Message;
 import com.chatapp.model.LastRead;
 import com.chatapp.model.RoomSettings;
+import com.chatapp.model.MessageStatus;
 import com.chatapp.repository.ChatRoomRepository;
 import com.chatapp.repository.MessageRepository;
 import com.chatapp.repository.LastReadRepository;
@@ -194,5 +195,28 @@ public class ChatRoomService {
         messagingTemplate.convertAndSend("/topic/room/" + roomId + "/admins", admins);
         
         return ResponseEntity.ok().build();
+    }
+
+    public Long getMessageCount(String roomId) {
+        return messageRepository.countByRoomId(roomId);
+    }
+
+    public Long getNewMessageCount(String roomId, LocalDateTime since) {
+        return messageRepository.countByRoomIdAndTimestampAfter(roomId, since);
+    }
+
+    public void markMessagesAsRead(String roomId, String userId) {
+        List<Message> unreadMessages = messageRepository.findByRoomIdOrderByTimestampDesc(roomId);
+        unreadMessages.forEach(message -> {
+            if (!message.getSenderId().equals(userId)) {
+                message.updateStatus(MessageStatus.READ);
+                messageRepository.save(message);
+            }
+        });
+    }
+
+    public Message getLastMessage(String roomId) {
+        return messageRepository.findFirstByRoomIdOrderByTimestampDesc(roomId)
+            .orElse(null);
     }
 }

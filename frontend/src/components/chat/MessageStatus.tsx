@@ -1,27 +1,39 @@
 import React from 'react';
-import '../../styles/components/MessageStatus.css';
 
 interface MessageStatusProps {
-  status: 'SENT' | 'DELIVERED' | 'READ';
+  status: 'sent' | 'delivered' | 'read';
 }
 
 export const MessageStatus: React.FC<MessageStatusProps> = ({ status }) => {
   const getStatusIcon = () => {
     switch (status) {
-      case 'SENT':
+      case 'sent':
         return '✓';
-      case 'DELIVERED':
+      case 'delivered':
         return '✓✓';
-      case 'READ':
+      case 'read':
         return '✓✓';
       default:
         return '';
     }
   };
 
+  const getStatusColor = () => {
+    switch (status) {
+      case 'read':
+        return 'text-blue-400';
+      case 'delivered':
+        return 'text-green-400';
+      default:
+        return 'text-gray-400';
+    }
+  };
+
   return (
-    <span className={`message-status ${status.toLowerCase()}`}>
+    <span className={`inline-flex items-center ${getStatusColor()} ml-1 text-xs font-medium`}>
       {getStatusIcon()}
     </span>
   );
-}; 
+};
+
+export default MessageStatus;

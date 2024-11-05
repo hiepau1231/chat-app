@@ -3,7 +3,12 @@ import { LoginCredentials, RegisterData, AuthResponse, User, TokenResponse } fro
 import { ApiError } from '../types/error';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080'
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
 });
 
 let isRefreshing = false;
@@ -85,6 +90,7 @@ export const authApi = {
       const { token, refreshToken } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('refreshToken', refreshToken);
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -138,8 +144,63 @@ export const authApi = {
 };
 
 export const chatApi = {
-  getRooms: (params: any) => api.get('/api/rooms', { params }),
-  getMessages: (roomId: string, params: any) => api.get(`/api/rooms/${roomId}/messages`, { params }),
-  sendMessage: (roomId: string, content: string) => api.post(`/api/rooms/${roomId}/messages`, { content }),
-  updateRoomSettings: (roomId: string, settings: any) => api.put(`/api/rooms/${roomId}/settings`, settings),
-}; 
+  getRooms: async (params: any) => {
+    try {
+      const response = await api.get('/api/rooms', { params });
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(500, 'FETCH_ROOMS_FAILED', 'Failed to fetch chat rooms.');
+    }
+  },
+
+  getAllMessages: async () => {
+    try {
+      const response = await api.get('/api/messages');
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(500, 'FETCH_MESSAGES_FAILED', 'Failed to fetch messages.');
+    }
+  },
+
+  getMessages: async (roomId: string, params: any) => {
+    try {
+      const response = await api.get(`/api/rooms/${roomId}/messages`, { params });
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(500, 'FETCH_ROOM_MESSAGES_FAILED', 'Failed to fetch room messages.');
+    }
+  },
+
+  sendMessage: async (roomId: string, content: string) => {
+    try {
+      const response = await api.post(`/api/rooms/${roomId}/messages`, { content });
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(500, 'SEND_MESSAGE_FAILED', 'Failed to send message.');
+    }
+  },
+
+  updateRoomSettings: async (roomId: string, settings: any) => {
+    try {
+      const response = await api.put(`/api/rooms/${roomId}/settings`, settings);
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(500, 'UPDATE_ROOM_SETTINGS_FAILED', 'Failed to update room settings.');
+    }
+  }
+};

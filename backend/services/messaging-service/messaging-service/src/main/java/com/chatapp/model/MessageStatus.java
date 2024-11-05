@@ -1,21 +1,40 @@
 package com.chatapp.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class MessageStatus {
-    private String messageId;
-    private String userId;
-    private Status status;
-    private long timestamp;
+public enum MessageStatus {
+    SENT,
+    DELIVERED,
+    READ;
 
     public enum Status {
         SENT,
         DELIVERED,
-        READ
+        READ,
+        FAILED
     }
-} 
+
+    public static class MessageStatusDetails {
+        private Status status;
+        private LocalDateTime timestamp;
+        private String userId;
+
+        public MessageStatusDetails(Status status, String userId) {
+            this.status = status;
+            this.userId = userId;
+            this.timestamp = LocalDateTime.now();
+        }
+
+        public Status getStatus() {
+            return status;
+        }
+
+        public LocalDateTime getTimestamp() {
+            return timestamp;
+        }
+
+        public String getUserId() {
+            return userId;
+        }
+    }
+}

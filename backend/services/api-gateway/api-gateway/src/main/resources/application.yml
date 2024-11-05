@@ -2,112 +2,98 @@ server:
   port: 8080
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: api-gateway
   cloud:
     gateway:
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins: "http://localhost:5173"
-            allowedMethods: GET,POST,PUT,DELETE,OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: true
-            exposedHeaders: "Authorization"
       discovery:
         locator:
           enabled: true
           lower-case-service-id: true
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:5173"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - Authorization
+              - Content-Type
+              - Accept
+              - X-Requested-With
+              - Origin
+            allowCredentials: true
+            exposedHeaders:
+              - Authorization
       routes:
         - id: user-service
           uri: lb://user-service
           predicates:
-            - Path=/api/users/**, /api/auth/**
+            - Path=/api/auth/**, /api/users/**
           filters:
-            - StripPrefix=0
+            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+            - RemoveRequestHeader=Cookie
+            - PreserveHostHeader
+            - AddResponseHeader=Access-Control-Allow-Origin, http://localhost:5173
+            - AddResponseHeader=Access-Control-Allow-Credentials, true
+
         - id: messaging-service
           uri: lb://messaging-service
           predicates:
-            - Path=/api/messages/**, /api/rooms/**
+            - Path=/api/messages/**
           filters:
-            - StripPrefix=0
-
-      default-filters:
-        - name: Retry
-          args:
-            retries: 3
-            methods: GET,POST,PUT,DELETE
-            series: SERVER_ERROR
-            exceptions: java.io.IOException,java.util.concurrent.TimeoutException
-        - name: RequestRateLimiter
-          args:
-            redis-rate-limiter.replenishRate: 50
-            redis-rate-limiter.burstCapacity: 100
-
-  redis:
-    host: localhost
-    port: 6379
-
-resilience4j:
-  circuitbreaker:
-    configs:
-      default:
-        slidingWindowSize: 10
-        failureRateThreshold: 50
-        waitDurationInOpenState: 10000
-        permittedNumberOfCallsInHalfOpenState: 3
-    instances:
-      userServiceCircuitBreaker:
-        baseConfig: default
-      messagingServiceCircuitBreaker:
-        baseConfig: default
-
-  retry:
-    configs:
-      default:
-        maxRetryAttempts: 3
-        waitDuration: 100
-        enableExponentialBackoff: true
-        exponentialBackoffMultiplier: 2
-    instances:
-      userServiceRetry:
-        baseConfig: default
-      messagingServiceRetry:
-        baseConfig: default
+            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+            - RemoveRequestHeader=Cookie
+            - PreserveHostHeader
+            - AddResponseHeader=Access-Control-Allow-Origin, http://localhost:5173
+            - AddResponseHeader=Access-Control-Allow-Credentials, true
 
 eureka:
   client:
-    service-url:
+    serviceUrl:
       defaultZone: http://localhost:8761/eureka/
     fetch-registry: true
     register-with-eureka: true
   instance:
     prefer-ip-address: true
     lease-renewal-interval-in-seconds: 10
-    lease-expiration-duration-in-seconds: 20
+    lease-expiration-duration-in-seconds: 30
 
 management:
   endpoints:
     web:
       exposure:
         include: "*"
-  metrics:
-    tags:
-      application: ${spring.application.name}
-    export:
-      prometheus:
-        enabled: true
   endpoint:
     health:
       show-details: always
 
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        slidingWindowSize: 10
+        permittedNumberOfCallsInHalfOpenState: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5000
+      messagingService:
+        slidingWindowSize: 10
+        permittedNumberOfCallsInHalfOpenState: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5000
+
 logging:
   level:
-    org.springframework.security: DEBUG
     org.springframework.cloud.gateway: DEBUG
-    org.springframework.web.cors: DEBUG
-    reactor.netty.http.server: DEBUG
+    reactor.netty: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
 
-main:
-  allow-bean-definition-overriding: true
-  web-application-type: reactive
+jwt:
+  secret: your_jwt_secret_key_here_make_it_long_and_secure_at_least_256_bits

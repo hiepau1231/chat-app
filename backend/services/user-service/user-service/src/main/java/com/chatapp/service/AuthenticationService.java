@@ -1,10 +1,8 @@
 package com.chatapp.service;
 
-import com.chatapp.dto.AuthRequest;
-import com.chatapp.dto.AuthResponse;
-import com.chatapp.dto.RegisterRequest;
-import com.chatapp.dto.UserResponse;
-import com.chatapp.model.Role;
+import com.chatapp.dto.*;
+import com.chatapp.exception.AuthenticationException;
+import com.chatapp.exception.UserAlreadyExistsException;
 import com.chatapp.model.User;
 import com.chatapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,37 +20,69 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public UserResponse register(RegisterRequest request) {
+        // Check if user exists
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new UserAlreadyExistsException("Email already registered");
+        }
+
+        // Create new user
         var user = User.builder()
-                .username(request.getUsername())
                 .email(request.getEmail())
+                .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
                 .build();
-        
-        var savedUser = userRepository.save(user);
-        
-        return UserResponse.builder()
-                .id(savedUser.getId())
-                .username(savedUser.getUsername())
-                .email(savedUser.getEmail())
-                .build();
+
+        userRepository.save(user);
+
+        return mapToUserResponse(user);
     }
 
     public AuthResponse authenticate(AuthRequest request) {
-        authenticationManager.authenticate(
+        try {
+            authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
+                    request.getEmail(),
+                    request.getPassword()
                 )
-        );
+            );
+        } catch (Exception e) {
+            throw new AuthenticationException("Invalid email or password");
+        }
+
         var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow();
-        var jwtToken = jwtService.generateToken(user);
+                .orElseThrow(() -> new AuthenticationException("User not found"));
+
+        var accessToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
-        
+
         return AuthResponse.builder()
-                .accessToken(jwtToken)
+                .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .user(mapToUserResponse(user))
                 .build();
+    }
+
+    private UserResponse mapToUserResponse(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .build();
+    }
+
+    public AuthResponse refreshToken(RefreshTokenRequest request) {
+        String userEmail = jwtService.extractUsername(request.getRefreshToken());
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new AuthenticationException("User not found"));
+
+        if (jwtService.isTokenValid(request.getRefreshToken(), user)) {
+            var accessToken = jwtService.generateToken(user);
+            return AuthResponse.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(request.getRefreshToken())
+                    .user(mapToUserResponse(user))
+                    .build();
+        }
+        throw new AuthenticationException("Invalid refresh token");
     }
 } 

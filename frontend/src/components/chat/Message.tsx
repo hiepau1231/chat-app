@@ -1,64 +1,37 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { format } from 'date-fns';
+import { useAuth } from '../../contexts/AuthContext';
 import { MessageStatus } from './MessageStatus';
-import { webSocketService } from '../../services/WebSocketService';
-import '../../styles/components/Message.css';
 
 interface MessageProps {
-  id: string;
-  content: string;
-  senderId: string;
-  currentUserId: string;
-  timestamp: string;
-  status?: 'SENT' | 'DELIVERED' | 'READ';
+  message: {
+    id: string;
+    content: string;
+    userId: string;
+    timestamp: string;
+    status: 'sent' | 'delivered' | 'read';
+  };
+  isOwnMessage: boolean;
 }
 
-export const Message: React.FC<MessageProps> = ({
-  id,
-  content,
-  senderId,
-  currentUserId,
-  timestamp,
-  status = 'SENT'
-}) => {
-  const isSentByMe = senderId === currentUserId;
-
-  useEffect(() => {
-    if (!isSentByMe) {
-      // Mark message as delivered when received
-      webSocketService.markMessageAsDelivered(id, currentUserId);
-      
-      // Mark as read when message is visible
-      const observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting) {
-            webSocketService.markMessageAsRead(id, currentUserId);
-            observer.disconnect();
-          }
-        },
-        { threshold: 1.0 }
-      );
-
-      const messageElement = document.getElementById(`message-${id}`);
-      if (messageElement) {
-        observer.observe(messageElement);
-      }
-
-      return () => observer.disconnect();
-    }
-  }, [id, currentUserId, isSentByMe]);
-
+export const Message: React.FC<MessageProps> = ({ message, isOwnMessage }) => {
   return (
-    <div 
-      id={`message-${id}`}
-      className={`message ${isSentByMe ? 'sent' : 'received'}`}
-    >
-      <div className="message-content">
-        {content}
-        {isSentByMe && <MessageStatus status={status} />}
-      </div>
-      <div className="message-timestamp">
-        {new Date(timestamp).toLocaleTimeString()}
+    <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-4`}>
+      <div
+        className={`max-w-[70%] rounded-lg px-4 py-2 ${
+          isOwnMessage ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-900'
+        }`}
+      >
+        <div className="text-sm break-words">{message.content}</div>
+        <div className="flex items-center justify-end space-x-1 mt-1">
+          <span className="text-xs opacity-75">
+            {format(new Date(message.timestamp), 'HH:mm')}
+          </span>
+          {isOwnMessage && <MessageStatus status={message.status} />}
+        </div>
       </div>
     </div>
   );
-}; 
+};
+
+export default Message;

@@ -1,86 +1,59 @@
 package com.chatapp.service;
 
-import com.chatapp.event.MessageSentEvent;
 import com.chatapp.model.Message;
 import com.chatapp.model.MessageStatus;
-import com.chatapp.model.TypingStatus;
 import com.chatapp.repository.MessageRepository;
-import com.chatapp.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class MessageService {
     private final MessageRepository messageRepository;
-    private final SimpMessagingTemplate messagingTemplate;
-    private final ApplicationEventPublisher eventPublisher;
 
-    public Message sendMessage(Message message) {
-        message.setCreatedAt(LocalDateTime.now());
-        Message savedMessage = messageRepository.save(message);
-        
-        // Publish event instead of direct service call
-        eventPublisher.publishEvent(new MessageSentEvent(savedMessage));
-        
-        // Broadcast message to room
-        messagingTemplate.convertAndSend(
-            "/topic/room/" + message.getRoomId(),
-            savedMessage
-        );
-        
-        return savedMessage;
+    public List<Message> getAllMessages() {
+        return messageRepository.findAll();
     }
 
     public List<Message> getRoomMessages(String roomId) {
-        return messageRepository.findByRoomIdOrderByCreatedAtDesc(roomId);
+        return messageRepository.findByRoomIdOrderByTimestampDesc(roomId);
     }
 
-    public List<Message> getUserMessages(String userId) {
-        return messageRepository.findBySenderIdOrReceiverIdOrderByCreatedAtDesc(userId, userId);
+    public Message sendMessage(Message message) {
+        message.setTimestamp(LocalDateTime.now());
+        message.setStatus(MessageStatus.SENT);
+        return messageRepository.save(message);
+    }
+
+    public Message saveMessage(Message message) {
+        return messageRepository.save(message);
     }
 
     public void deleteMessage(String messageId) {
-        Message message = messageRepository.findById(messageId)
-            .orElseThrow(() -> new ResourceNotFoundException("Message not found"));
-            
-        messageRepository.delete(message);
-        
-        // Notify room about message deletion
-        messagingTemplate.convertAndSend(
-            "/topic/room/" + message.getRoomId() + "/delete",
-            messageId
-        );
+        messageRepository.deleteById(messageId);
     }
 
-    public void updateMessageStatus(MessageStatus status) {
-        Message message = messageRepository.findById(status.getMessageId())
-            .orElseThrow(() -> new ResourceNotFoundException("Message not found"));
-            
-        message.updateStatus(status.getUserId(), status.getStatus());
-        messageRepository.save(message);
-        
-        // Broadcast status update
-        messagingTemplate.convertAndSend(
-            "/topic/room/" + message.getRoomId() + "/status",
-            status
-        );
+    public Long countMessagesByRoom(String roomId) {
+        return messageRepository.countByRoomId(roomId);
     }
 
-    public void updateTypingStatus(TypingStatus status) {
-        // Broadcast typing status to room
-        messagingTemplate.convertAndSend(
-            "/topic/room/" + status.getRoomId() + "/typing",
-            Map.of(
-                "userId", status.getUserId(),
-                "isTyping", status.isTyping(),
-                "timestamp", status.getTimestamp()
-            )
-        );
+    public Long countNewMessages(String roomId, LocalDateTime since) {
+        return messageRepository.countByRoomIdAndTimestampAfter(roomId, since);
+    }
+
+    public Optional<Message> getLastMessage(String roomId) {
+        return messageRepository.findFirstByRoomIdOrderByTimestampDesc(roomId);
+    }
+
+    public Message updateMessageStatus(String messageId, MessageStatus newStatus) {
+        return messageRepository.findById(messageId)
+            .map(message -> {
+                message.setStatus(newStatus);
+                return messageRepository.save(message);
+            })
+            .orElseThrow(() -> new RuntimeException("Message not found"));
     }
 }

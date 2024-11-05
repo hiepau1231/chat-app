@@ -7,15 +7,56 @@ spring:
   data:
     mongodb:
       uri: mongodb+srv://mrrdavidd:lrrDHlAcQHFC1dg6@hiep.segu1.mongodb.net/chatapp_messages
+      auto-index-creation: true
+      connection-pool:
+        max-size: 50
+        min-size: 5
+      connect-timeout: 5000
+      socket-timeout: 5000
   rabbitmq:
     host: localhost
     port: 5672
     username: guest
     password: guest
+  security:
+    filter:
+      order: 10
+  web:
+    cors:
+      allowed-origins: "http://localhost:5173"
+      allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+      allowed-headers: "*"
+      allow-credentials: true
+      exposed-headers: "Authorization"
 
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
   instance:
     prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.chatapp: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.data.mongodb: DEBUG
+    org.mongodb.driver: DEBUG
+
+jwt:
+  secret: your_jwt_secret_key_here_make_it_long_and_secure_at_least_256_bits
+  expiration: 86400000 # 24 hours
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
