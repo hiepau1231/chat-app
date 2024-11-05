@@ -348,3 +348,96 @@ Hệ thống chat thời gian thực với kiến trúc microservices, tập tru
    - WebRTC
    - TURN/STUN servers
    - Media server for group calls
+
+### Project tree
+
+.
+├── backend/
+│   ├── config/
+│   │   ├── grafana/
+│   │   │   ├── dashboards/
+│   │   │   │   ├── service-metrics.json
+│   │   │   │   └── system-overview.json
+│   │   │   └── provisioning/
+│   │   │       └── dashboards/
+│   │   │           └── dashboard.yml
+│   │   ├── logstash/
+│   │   │   └── pipeline/
+│   │   │       └── main.conf
+│   │   └── prometheus/
+│   │       └── prometheus.yml
+│   └── services/
+│       ├── api-gateway/
+│       │   └── api-gateway/
+│       │       ├── pom.xml
+│       │       └── src/
+│       │           └── main/
+│       │               └── java/
+│       │                   └── com/
+│       │                       └── chatapp/
+│       │                           └── App.java
+│       ├── messaging-service/
+│       │   └── messaging-service/
+│       │       ├── pom.xml
+│       │       └── src/
+│       │           └── main/
+│       │               └── java/
+│       │                   └── com/
+│       │                       └── chatapp/
+│       │                           └── App.java
+│       ├── service-registry/
+│       │   └── service-registry/
+│       │       ├── pom.xml
+│       │       └── src/
+│       │           └── main/
+│       │               └── java/
+│       │                   └── com/
+│       │                       └── chatapp/
+│       │                           └── App.java
+│       └── user-service/
+│           └── user-service/
+│               ├── pom.xml
+│               └── src/
+│                   └── main/
+│                       └── java/
+│                           └── com/
+│                               └── chatapp/
+│                                   └── controller/
+│                                       └── UserController.java
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── chat/
+│   │   │   │   ├── ChatRoomList.tsx
+│   │   │   │   ├── RoomHeader.tsx
+│   │   │   │   └── ChatSidebar.tsx
+│   │   │   └── layout/
+│   │   │       ├── ChatArea.tsx
+│   │   │       ├── ChatLayout.tsx
+│   │   │       ├── Layout.tsx
+│   │   │       └── Sidebar.tsx
+│   │   ├── lib/
+│   │   │   └── api.ts
+│   │   ├── pages/
+│   │   │   └── Home.tsx
+│   │   ├── styles/
+│   │   │   └── components/
+│   │   │       └── ChatRoomList.css
+│   │   ├── App.css
+│   │   ├── index.css
+│   │   ├── main.tsx
+│   │   └── vite-env.d.ts
+│   ├── .gitignore
+│   ├── components.json
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── README.md
+│   ├── tailwind.config.js
+│   ├── tsconfig.app.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   └── vite.config.ts
+└── .gitignore

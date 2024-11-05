@@ -1,87 +1,48 @@
-# Current Tasks and Progress
+# Current Tasks
 
-## In Progress
+## Backend Priority Tasks
 
-### Authentication System (70%)
-#### Completed:
-- [x] Basic JWT implementation
-- [x] User registration with validation
-- [x] User login with JWT
-- [x] Refresh token mechanism
-- [x] Basic authorization with Spring Security
+1. Service Registry (Eureka Server)
+- [ ] Create basic Eureka Server configuration
+- [ ] Configure service discovery for all microservices
+- [ ] Add health checks
 
-#### Todo:
-- [ ] Email verification
-- [ ] Password reset functionality
-- [ ] Enhanced error handling
-- [ ] Rate limiting for auth endpoints
+2. API Gateway
+- [ ] Configure routes for all services
+- [ ] Implement CORS configuration
+- [ ] Add authentication filter
+- [ ] Configure load balancing
 
-### Frontend Development (30%)
-#### Completed:
-- [x] Project setup with Vite
-- [x] Tailwind CSS integration
-- [x] Basic routing setup
+3. Messaging Service
+- [ ] Create WebSocket configuration
+- [ ] Implement chat room management
+- [ ] Add message persistence
+- [ ] Setup real-time notifications
+- [ ] Add typing indicators
+- [ ] Implement user status updates
 
-#### Todo:
-- [ ] Login page
-- [ ] Registration page
-- [ ] User profile page
-- [ ] Chat interface design
-- [ ] Real-time message components
-- [ ] Error handling components
+4. User Service (In Progress)
+- [x] Basic authentication
+- [x] User registration
+- [x] JWT implementation
+- [ ] User profile management
+- [ ] Friend/Contact system
+- [ ] User search functionality
 
-### Messaging System (50%)
-#### Completed:
-- [x] Basic WebSocket configuration
-- [x] Message service setup
-- [x] Chat room model
-- [x] Basic message sending/receiving
+## Infrastructure Tasks
 
-#### Todo:
-- [ ] Message persistence
-- [ ] Chat history
-- [ ] Read receipts
-- [ ] Typing indicators
-- [ ] File sharing
-- [ ] Message encryption
+1. Database Setup
+- [ ] Configure PostgreSQL for User Service
+- [ ] Configure MongoDB for Message Service
+- [ ] Setup Redis for caching
 
-### Monitoring & Logging (20%)
-#### Completed:
-- [x] Basic Grafana setup
-- [x] Docker compose for monitoring
+2. Monitoring
+- [ ] Configure Prometheus
+- [ ] Setup Grafana dashboards
+- [ ] Implement logging with ELK Stack
 
-#### Todo:
-- [ ] System metrics dashboard
-- [ ] Service-specific metrics
-- [ ] Alert configuration
-- [ ] Log aggregation
-- [ ] Performance monitoring
-
-## Next Steps (Priority Order):
-1. Complete email verification system
-   - Setup email service
-   - Implement verification tokens
-   - Create email templates
-
-2. Implement password reset
-   - Reset token generation
-   - Password reset endpoints
-   - Email notifications
-
-3. Enhance error handling
-   - Global exception handling
-   - Validation messages
-   - Client-side validation
-
-4. Start frontend implementation
-   - Authentication pages
-   - Protected routes
-   - Token management
-   - User interface components
-
-## Recent Updates:
-- Added JWT authentication
-- Implemented refresh token mechanism
-- Created user registration and login
-- Setup basic authorization
-- Configured WebSocket for messaging
+## Next Steps:
+1. Complete Service Registry
+2. Implement API Gateway routing
+3. Setup Messaging Service with WebSocket
+4. Add monitoring and logging

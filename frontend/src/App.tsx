@@ -1,45 +1,47 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { LoginForm } from './components/auth/LoginForm';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { RegisterForm } from './components/auth/RegisterForm';
-import { ChatRoom } from './components/chat/ChatRoom';
-import { PrivateRoute } from './components/common/PrivateRoute';
+import { LoginForm } from './components/auth/LoginForm';
+import { Home } from './pages/Home';
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('token');
+      setIsAuthenticated(!!token);
+    };
+
+    checkAuth();
+    window.addEventListener('storage', checkAuth);
+
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+    };
+  }, []);
+
+  if (isAuthenticated === null) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
         <Route 
           path="/" 
-          element={
-            <PrivateRoute>
-              <Navigate to="/chat" replace />
-            </PrivateRoute>
-          } 
-        />
-
-        <Route path="/login" element={<LoginForm />} />
-        <Route path="/register" element={<RegisterForm />} />
-
-        <Route 
-          path="/chat" 
-          element={
-            <PrivateRoute>
-              <ChatRoom />
-            </PrivateRoute>
-          } 
+          element={isAuthenticated ? <Home /> : <Navigate to="/login" replace />} 
         />
         <Route 
-          path="/chat/:roomId" 
-          element={
-            <PrivateRoute>
-              <ChatRoom />
-            </PrivateRoute>
-          } 
+          path="/register" 
+          element={isAuthenticated ? <Navigate to="/" replace /> : <RegisterForm />} 
         />
-
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route 
+          path="/login" 
+          element={isAuthenticated ? <Navigate to="/" replace /> : <LoginForm />} 
+        />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
 

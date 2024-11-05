@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { ChatRoom } from '../../models/ChatRoom';
 import { chatRoomService } from '../../services/ChatRoomService';
 import { TypingIndicator } from './TypingIndicator';
@@ -12,7 +12,7 @@ interface ChatRoomListProps {
   isLoading: boolean;
 }
 
-// Thêm mock data
+// Mock data được định nghĩa bên ngoài component để tránh re-render
 const MOCK_ROOMS: ChatRoom[] = [
   {
     id: '1',
@@ -29,22 +29,6 @@ const MOCK_ROOMS: ChatRoom[] = [
     isGroup: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
-  },
-  {
-    id: '2',
-    name: 'Team Chat',
-    avatar: null,
-    lastMessage: {
-      id: 'm2',
-      content: 'Meeting at 2 PM',
-      senderId: 'user3',
-      timestamp: new Date().toISOString()
-    },
-    unreadCount: 5,
-    members: ['user123', 'user2', 'user3'],
-    isGroup: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
   }
 ];
 
@@ -56,56 +40,44 @@ export const ChatRoomList: React.FC<ChatRoomListProps> = ({
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
   const [loading, setLoading] = useState(initialLoading);
   const [searchQuery, setSearchQuery] = useState('');
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
   const [typingStatuses, setTypingStatuses] = useState<Map<string, Set<string>>>(new Map());
-  const [totalPages, setTotalPages] = useState(0);
-  
-  const observer = useRef<IntersectionObserver>();
-  const lastRoomElementRef = useCallback((node: HTMLDivElement) => {
-    if (loading) return;
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore) {
-        setPage(prevPage => prevPage + 1);
-      }
-    });
-    if (node) observer.current.observe(node);
-  }, [loading, hasMore]);
+  const [showNewChatModal, setShowNewChatModal] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
+  // Fetch rooms chỉ khi component mount
   useEffect(() => {
-    fetchRooms();
-    subscribeToUpdates();
-  }, [page]);
-
-  const fetchRooms = async () => {
-    try {
-      setLoading(true);
-      // Tạm thời dùng mock data
+    if (!initialized) {
       setRooms(MOCK_ROOMS);
-      setHasMore(false);
-    } catch (error) {
-      console.error('Error fetching rooms:', error);
-    } finally {
-      setLoading(false);
+      setInitialized(true);
     }
-  };
+  }, [initialized]);
 
-  const subscribeToUpdates = () => {
-    webSocketService.getTypingStatus('').subscribe(statusMap => {
-      setTypingStatuses(statusMap);
-    });
-  };
-
-  const filteredRooms = rooms.filter(room => 
-    room.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // Xử lý search riêng biệt
+  const filteredRooms = useMemo(() => 
+    rooms.filter(room => 
+      room.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ),
+    [rooms, searchQuery]
   );
 
-  // Fetch rooms when search changes
+  // WebSocket subscription
   useEffect(() => {
-    setPage(0); // Reset page when search changes
-    fetchRooms();
-  }, [searchQuery]);
+    const subscription = webSocketService.getTypingStatus('').subscribe(statusMap => {
+      setTypingStatuses(statusMap);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
+
+  const handleNewChat = useCallback(() => {
+    setShowNewChatModal(true);
+  }, []);
 
   return (
     <div className="chat-room-list">
@@ -114,13 +86,13 @@ export const ChatRoomList: React.FC<ChatRoomListProps> = ({
           type="text"
           placeholder="Search chats..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => handleSearch(e.target.value)}
           className="search-input"
         />
       </div>
 
       <div className="rooms-container">
-        {loading && page === 0 ? (
+        {loading ? (
           <div className="loading-skeleton">
             {[1, 2, 3].map(n => (
               <div key={n} className="room-item-skeleton">
@@ -132,7 +104,7 @@ export const ChatRoomList: React.FC<ChatRoomListProps> = ({
               </div>
             ))}
           </div>
-        ) : filteredRooms.length === 0 ? (
+        ) : rooms.length === 0 ? (
           <div className="no-rooms">
             <p>{searchQuery ? 'No results found' : 'No chat rooms available'}</p>
             <button onClick={handleNewChat} className="start-chat-button">
@@ -140,10 +112,9 @@ export const ChatRoomList: React.FC<ChatRoomListProps> = ({
             </button>
           </div>
         ) : (
-          filteredRooms.map((room, index) => (
+          rooms.map((room) => (
             <div
               key={room.id}
-              ref={index === filteredRooms.length - 1 ? lastRoomElementRef : null}
               className="room-item"
               onClick={() => onRoomSelect(room.id)}
             >
@@ -194,13 +165,18 @@ export const ChatRoomList: React.FC<ChatRoomListProps> = ({
             </div>
           ))
         )}
-
-        {loading && page > 0 && (
-          <div className="loading-more">
-            <div className="spinner" />
-          </div>
-        )}
       </div>
+
+      {showNewChatModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Start New Chat</h3>
+            <button onClick={() => setShowNewChatModal(false)}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }; 

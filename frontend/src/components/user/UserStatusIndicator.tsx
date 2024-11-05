@@ -1,38 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { UserStatus } from '../../services/WebSocketService';
 import { webSocketService } from '../../services/WebSocketService';
 import './UserStatusIndicator.css';
 
 interface UserStatusIndicatorProps {
   userId: string;
-  showLastSeen?: boolean;
 }
 
-export const UserStatusIndicator: React.FC<UserStatusIndicatorProps> = ({
-  userId,
-  showLastSeen = false
-}) => {
-  const [status, setStatus] = useState<UserStatus | undefined>();
+export const UserStatusIndicator: React.FC<UserStatusIndicatorProps> = ({ userId }) => {
+  const [status, setStatus] = useState<string>('offline');
 
   useEffect(() => {
-    const subscription = webSocketService.getUserStatusUpdates()
-      .subscribe(statusMap => {
-        setStatus(statusMap.get(userId));
-      });
+    const subscription = webSocketService.getUserStatusUpdates().subscribe(statusMap => {
+      const userStatus = statusMap.get(userId);
+      if (userStatus) {
+        setStatus(userStatus);
+      }
+    });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [userId]);
 
-  if (!status) return null;
-
   return (
-    <div className="user-status">
-      <span className={`status-dot ${status.online ? 'online' : 'offline'}`} />
-      {showLastSeen && !status.online && (
-        <span className="last-seen">
-          Last seen {new Date(status.lastSeen).toLocaleString()}
-        </span>
-      )}
+    <div className={`status-indicator ${status}`}>
+      <span className="status-dot"></span>
+      <span className="status-text">{status}</span>
     </div>
   );
 }; 

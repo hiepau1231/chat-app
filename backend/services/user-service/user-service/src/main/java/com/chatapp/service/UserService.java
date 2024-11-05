@@ -11,17 +11,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Primary
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
-    @Lazy
     private final PasswordEncoder passwordEncoder;
 
     public UserResponse registerUser(RegisterRequest request) {
@@ -60,7 +60,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    public Optional<User> getUserById(Long id) {
+    public Optional<User> getUserById(UUID id) {
         return userRepository.findById(id);
     }
 
