@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,17 +66,38 @@ public class UserProfileService {
         userProfileRepository.save(userProfile);
     }
 
+    private Map<String, Object> createUserMap(User user, UserProfile profile) {
+        Map<String, Object> userMap = new HashMap<>();
+        
+        // Safely add user details with null checks and default values
+        if (user != null) {
+            userMap.put("id", user.getId() != null ? user.getId().toString() : null);
+            userMap.put("username", user.getUsername() != null ? user.getUsername() : "");
+        } else {
+            userMap.put("id", null);
+            userMap.put("username", "");
+        }
+        
+        // Safely add profile details with null checks and default values
+        if (profile != null) {
+            userMap.put("displayName", profile.getDisplayName() != null ? profile.getDisplayName() : "");
+            userMap.put("avatarUrl", profile.getAvatarUrl() != null ? profile.getAvatarUrl() : "");
+            userMap.put("bio", profile.getBio() != null ? profile.getBio() : "");
+        } else {
+            userMap.put("displayName", "");
+            userMap.put("avatarUrl", "");
+            userMap.put("bio", "");
+        }
+        
+        return userMap;
+    }
+
     public List<Map<String, Object>> searchUsers(String searchTerm) {
         List<UserProfile> profiles = userProfileRepository.searchProfiles(searchTerm);
         
         return profiles.stream()
-            .map(profile -> Map.of(
-                "id", profile.getUser().getId(),
-                "username", profile.getUser().getUsername(),
-                "displayName", profile.getDisplayName(),
-                "avatarUrl", profile.getAvatarUrl(),
-                "bio", profile.getBio()
-            ))
+            .filter(profile -> profile != null && profile.getUser() != null)
+            .map(profile -> createUserMap(profile.getUser(), profile))
             .collect(Collectors.toList());
     }
 
@@ -88,12 +112,7 @@ public class UserProfileService {
                 UserProfile friendProfile = userProfileRepository.findByUser_Id(friendId)
                     .orElseThrow(() -> new RuntimeException("Friend profile not found"));
                 
-                return Map.of(
-                    "id", friend.getId(),
-                    "username", friend.getUsername(),
-                    "displayName", friendProfile.getDisplayName(),
-                    "avatarUrl", friendProfile.getAvatarUrl()
-                );
+                return createUserMap(friend, friendProfile);
             })
             .collect(Collectors.toList());
     }

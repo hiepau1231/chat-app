@@ -1,4 +1,4 @@
-.package com.chatapp.model;
+package com.chatapp.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -45,14 +45,17 @@ public class UserProfile {
     @ElementCollection
     @CollectionTable(name = "user_interests", joinColumns = @JoinColumn(name = "profile_id"))
     @Column(name = "interest")
+    @Builder.Default
     private List<String> interests = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "user_friends", joinColumns = @JoinColumn(name = "profile_id"))
     @Column(name = "friend_id")
+    @Builder.Default
     private List<UUID> friends = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private PrivacyLevel profilePrivacy = PrivacyLevel.PUBLIC;
 
     public enum PrivacyLevel {

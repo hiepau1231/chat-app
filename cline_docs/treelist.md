@@ -70,7 +70,9 @@ backend\services\user-service\user-service\pom.xml
 backend\services\user-service\user-service\src\main\java\com\chatapp\App.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\config\JwtConfig.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\config\PasswordConfig.java
+backend\services\user-service\user-service\src\main\java\com\chatapp\config\RedisConfig.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\config\SecurityConfig.java
+backend\services\user-service\user-service\src\main\java\com\chatapp\config\WebConfig.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\config\WebMvcConfig.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\controller\AuthController.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\controller\UserController.java
@@ -85,12 +87,16 @@ backend\services\user-service\user-service\src\main\java\com\chatapp\exception\G
 backend\services\user-service\user-service\src\main\java\com\chatapp\exception\UserAlreadyExistsException.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\model\Role.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\model\User.java
+backend\services\user-service\user-service\src\main\java\com\chatapp\model\UserProfile.java
+backend\services\user-service\user-service\src\main\java\com\chatapp\repository\UserProfileRepository.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\repository\UserRepository.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\security\CustomUserDetailsService.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\security\JwtAuthenticationFilter.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\security\JwtAuthenticationToken.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\service\AuthenticationService.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\service\JwtService.java
+backend\services\user-service\user-service\src\main\java\com\chatapp\service\RedisCacheService.java
+backend\services\user-service\user-service\src\main\java\com\chatapp\service\UserProfileService.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\service\UserService.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\UserServiceApplication.java
 backend\services\user-service\user-service\src\main\resources\application.yml

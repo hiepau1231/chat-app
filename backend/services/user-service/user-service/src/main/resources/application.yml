@@ -4,10 +4,15 @@ server:
 spring:
   application:
     name: user-service
+  main:
+    allow-bean-definition-overriding: true
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: false
   datasource:
-    url: jdbc:postgresql://localhost:5432/chatapp
-    username: chatapp
-    password: chatapp
+    url: jdbc:postgresql://localhost:5433/chatapp_users
+    username: postgres
+    password: postgres
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -37,6 +42,7 @@ eureka:
 jwt:
   secret: your_jwt_secret_key_here_make_it_long_and_secure_at_least_256_bits
   expiration: 86400000 # 24 hours
+  refresh-expiration: 604800000 # 7 days
 
 logging:
   level:
