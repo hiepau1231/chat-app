@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { validateEmail, validateRegistrationPassword } from '../../types/auth';
+import { authApi } from '../../services/api';
 
 export const RegisterForm = () => {
   const navigate = useNavigate();
@@ -17,38 +18,23 @@ export const RegisterForm = () => {
     setError('');
 
     if (!validateEmail(formData.email.trim())) {
-      setError('Please enter a valid email address');
+      setError('Email không hợp lệ');
       return;
     }
 
     if (!validateRegistrationPassword(formData.password)) {
-      setError('Password must contain at least one digit, one lowercase, one uppercase letter and one special character');
+      setError('Mật khẩu phải có ít nhất 4 ký tự');
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Origin': 'http://localhost:5173'
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Registration failed');
-      }
-
-      const data = await response.json();
-      console.log('Registration successful:', data);
+      await authApi.register(formData);
+      console.log('Đăng ký thành công');
       navigate('/login');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
+    } catch (err: any) {
+      setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -59,10 +45,10 @@ export const RegisterForm = () => {
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
-            Register Account
+            Đăng Ký Tài Khoản
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Please fill in your details
+            Vui lòng điền thông tin của bạn
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -72,7 +58,7 @@ export const RegisterForm = () => {
           <div className="rounded-md shadow-sm space-y-4">
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                Username
+                Tên người dùng
               </label>
               <input
                 id="username"
@@ -80,7 +66,7 @@ export const RegisterForm = () => {
                 type="text"
                 required
                 className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter your username"
+                placeholder="Nhập tên người dùng"
                 value={formData.username}
                 onChange={(e) => setFormData({...formData, username: e.target.value})}
                 disabled={loading}
@@ -96,7 +82,7 @@ export const RegisterForm = () => {
                 type="email"
                 required
                 className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter your email"
+                placeholder="Nhập email của bạn"
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                 disabled={loading}
@@ -104,7 +90,7 @@ export const RegisterForm = () => {
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
+                Mật khẩu
               </label>
               <input
                 id="password"
@@ -112,19 +98,15 @@ export const RegisterForm = () => {
                 type="password"
                 required
                 className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter your password"
+                placeholder="Nhập mật khẩu"
                 value={formData.password}
                 onChange={(e) => setFormData({...formData, password: e.target.value})}
                 disabled={loading}
               />
               <div className="mt-2 text-sm text-gray-500">
-                Password must contain:
+                Yêu cầu mật khẩu:
                 <ul className="list-disc list-inside">
-                  <li>At least one digit (0-9)</li>
-                  <li>At least one lowercase letter (a-z)</li>
-                  <li>At least one uppercase letter (A-Z)</li>
-                  <li>At least one special character (@#$%^&+=)</li>
-                  <li>Minimum 6 characters</li>
+                  <li>Ít nhất 4 ký tự</li>
                 </ul>
               </div>
             </div>
@@ -133,7 +115,7 @@ export const RegisterForm = () => {
           <div className="flex items-center justify-between">
             <div className="text-sm">
               <Link to="/login" className="text-indigo-600 hover:text-indigo-500">
-                Already have an account? Sign in
+                Đã có tài khoản? Đăng nhập
               </Link>
             </div>
           </div>
@@ -151,10 +133,10 @@ export const RegisterForm = () => {
                   <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                     {/* Add loading spinner icon here */}
                   </span>
-                  Registering...
+                  Đang đăng ký...
                 </>
               ) : (
-                'Register'
+                'Đăng ký'
               )}
             </button>
           </div>

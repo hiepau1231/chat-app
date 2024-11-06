@@ -9,7 +9,6 @@ import lombok.Builder;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -19,9 +18,8 @@ import java.util.UUID;
 @Table(name = "user_profiles")
 public class UserProfile {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(columnDefinition = "uuid", updatable = false)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -52,7 +50,7 @@ public class UserProfile {
     @CollectionTable(name = "user_friends", joinColumns = @JoinColumn(name = "profile_id"))
     @Column(name = "friend_id")
     @Builder.Default
-    private List<UUID> friends = new ArrayList<>();
+    private List<Long> friends = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -64,13 +62,13 @@ public class UserProfile {
         PUBLIC
     }
 
-    public void addFriend(UUID friendId) {
+    public void addFriend(Long friendId) {
         if (!this.friends.contains(friendId)) {
             this.friends.add(friendId);
         }
     }
 
-    public void removeFriend(UUID friendId) {
+    public void removeFriend(Long friendId) {
         this.friends.remove(friendId);
     }
 }

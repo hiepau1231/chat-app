@@ -16,19 +16,12 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
-  redis:
-    host: localhost
-    port: 6379
-    database: 0
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: -1ms
-    timeout: 5000ms
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 eureka:
   client:
@@ -49,7 +42,6 @@ logging:
     org.springframework.security: DEBUG
     com.chatapp: DEBUG
     org.springframework.web: DEBUG
-    org.springframework.data.redis: DEBUG
 
 management:
   endpoints:

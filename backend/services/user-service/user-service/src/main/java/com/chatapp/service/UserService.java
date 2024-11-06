@@ -7,37 +7,37 @@ import com.chatapp.model.Role;
 import com.chatapp.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.springframework.security.core.userdetails.UserDetails;
-
 import org.springframework.security.core.userdetails.UserDetailsService;
-
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
 import org.springframework.stereotype.Service;
-
 import org.springframework.context.annotation.Primary;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Primary
 @RequiredArgsConstructor
+@Slf4j
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UserResponse registerUser(RegisterRequest request) {
+        log.debug("Registering new user with email: {}", request.getEmail());
+        
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username is already taken");
+            log.warn("Username already taken: {}", request.getUsername());
+            throw new RuntimeException("Tên người dùng đã tồn tại");
         }
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email is already registered");
+            log.warn("Email already registered: {}", request.getEmail());
+            throw new RuntimeException("Email đã được đăng ký");
         }
 
         User user = new User();
@@ -47,6 +47,7 @@ public class UserService implements UserDetailsService {
         user.setRole(Role.USER);
 
         User savedUser = userRepository.save(user);
+        log.info("Successfully registered user: {}", request.getEmail());
 
         return UserResponse.builder()
             .id(savedUser.getId())
@@ -56,22 +57,30 @@ public class UserService implements UserDetailsService {
     }
 
     public User createUser(User user) {
+        log.debug("Creating new user with email: {}", user.getEmail());
+        
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+            log.warn("Email already exists: {}", user.getEmail());
+            throw new RuntimeException("Email đã tồn tại");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        log.info("Successfully created user: {}", user.getEmail());
+        return savedUser;
     }
 
-    public Optional<User> getUserById(UUID id) {
+    public Optional<User> getUserById(Long id) {
+        log.debug("Getting user by id: {}", id);
         return userRepository.findById(id);
     }
 
     public Optional<User> getUserByEmail(String email) {
+        log.debug("Getting user by email: {}", email);
         return userRepository.findByEmail(email);
     }
 
     public Map<String, Object> getUserProfile(User user) {
+        log.debug("Getting profile for user: {}", user.getEmail());
         return Map.of(
             "id", user.getId(),
             "email", user.getEmail(),
@@ -81,9 +90,11 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        log.debug("Loading user by username (email): {}", username);
         return userRepository.findByEmail(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
+            .orElseThrow(() -> {
+                log.warn("User not found with email: {}", username);
+                return new UsernameNotFoundException("Không tìm thấy người dùng với email: " + username);
+            });
     }
 }
-
-

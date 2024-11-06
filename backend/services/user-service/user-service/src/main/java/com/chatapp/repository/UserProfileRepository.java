@@ -8,11 +8,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface UserProfileRepository extends JpaRepository<UserProfile, UUID> {
-    Optional<UserProfile> findByUser_Id(UUID userId);
+public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
+    Optional<UserProfile> findByUser_Id(Long userId);
     Optional<UserProfile> findByUser_Email(String email);
 
     @Query("SELECT p FROM UserProfile p WHERE " +

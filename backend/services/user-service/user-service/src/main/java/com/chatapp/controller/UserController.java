@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
@@ -33,13 +32,12 @@ public class UserController {
             if (user == null) {
                 log.error("User is null in getCurrentUser");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "User not authenticated"));
+                    .body(Map.of("error", "Người dùng chưa đăng nhập"));
             }
             
             log.debug("User found: {}", user.getEmail());
             Map<String, Object> userProfile = userService.getUserProfile(user);
             
-            // Добавляем дополнительную информацию из UserProfile
             userProfileService.getUserProfileByEmail(user.getEmail()).ifPresent(profile -> {
                 userProfile.put("displayName", profile.getDisplayName());
                 userProfile.put("bio", profile.getBio());
@@ -52,12 +50,12 @@ public class UserController {
         } catch (Exception e) {
             log.error("Error in getCurrentUser: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Internal server error"));
+                .body(Map.of("error", "Lỗi hệ thống"));
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable UUID id) {
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
         return userService.getUserById(id)
                 .map(user -> ResponseEntity.ok(userService.getUserProfile(user)))
                 .orElse(ResponseEntity.notFound().build());
@@ -80,7 +78,7 @@ public class UserController {
         } catch (Exception e) {
             log.error("Error updating user profile: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Could not update profile"));
+                .body(Map.of("error", "Không thể cập nhật thông tin người dùng"));
         }
     }
 
@@ -94,28 +92,28 @@ public class UserController {
     @PostMapping("/{friendId}/add")
     public ResponseEntity<?> addFriend(
             @AuthenticationPrincipal User user,
-            @PathVariable UUID friendId) {
+            @PathVariable Long friendId) {
         try {
             userProfileService.addFriend(user.getId(), friendId);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             log.error("Error adding friend: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Could not add friend"));
+                .body(Map.of("error", "Không thể thêm bạn"));
         }
     }
 
     @DeleteMapping("/{friendId}/remove")
     public ResponseEntity<?> removeFriend(
             @AuthenticationPrincipal User user,
-            @PathVariable UUID friendId) {
+            @PathVariable Long friendId) {
         try {
             userProfileService.removeFriend(user.getId(), friendId);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             log.error("Error removing friend: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Could not remove friend"));
+                .body(Map.of("error", "Không thể xóa bạn"));
         }
     }
 

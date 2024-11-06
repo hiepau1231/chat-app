@@ -14,10 +14,9 @@ export const validateEmail = (email: string): boolean => {
   return re.test(email);
 };
 
-// Used only during registration
+// Used only during registration - simplified validation
 export const validateRegistrationPassword = (password: string): boolean => {
-  const re = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\S+$).{6,}$/;
-  return re.test(password);
+  return password.length >= 4; // Chỉ kiểm tra độ dài tối thiểu 4 ký tự
 };
 
 // Used during login - only checks if password is not empty
