@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { validateEmail, validateLoginPassword } from '../../types/auth';
 
 export const LoginForm = () => {
   const navigate = useNavigate();
@@ -17,30 +18,16 @@ export const LoginForm = () => {
     return <Navigate to="/" replace />;
   }
 
-  const validatePassword = (password: string) => {
-    const regex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$/;
-    return regex.test(password);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email.trim())) {
+    if (!validateEmail(formData.email.trim())) {
       setError('Please enter a valid email address');
       return;
     }
 
-    if (!formData.password) {
+    if (!validateLoginPassword(formData.password)) {
       setError('Password is required');
-      return;
-    }
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
-    if (!validatePassword(formData.password)) {
-      setError('Password must contain at least one digit, one lowercase, one uppercase letter and one special character');
       return;
     }
 
@@ -139,18 +126,7 @@ export const LoginForm = () => {
                 value={formData.password}
                 onChange={(e) => setFormData({...formData, password: e.target.value})}
                 disabled={loading}
-                minLength={6}
               />
-              <div className="password-requirements mt-1 text-xs text-gray-500">
-                Password must contain at least:
-              </div>
-              <ul className="list-disc list-inside text-xs text-gray-500">
-                <li>6 characters</li>
-                <li>One uppercase letter</li>
-                <li>One lowercase letter</li>
-                <li>One number</li>
-                <li>One special character (@#$%^&+=)</li>
-              </ul>
             </div>
           </div>
 

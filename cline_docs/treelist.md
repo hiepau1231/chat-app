@@ -68,6 +68,7 @@ backend\services\user-service\src\main\java\com\chatapp\controller\AuthControlle
 backend\services\user-service\src\main\java\com\chatapp\model\User.java
 backend\services\user-service\user-service\pom.xml
 backend\services\user-service\user-service\src\main\java\com\chatapp\App.java
+backend\services\user-service\user-service\src\main\java\com\chatapp\config\JacksonConfig.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\config\JwtConfig.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\config\PasswordConfig.java
 backend\services\user-service\user-service\src\main\java\com\chatapp\config\RedisConfig.java
@@ -179,6 +180,7 @@ frontend\tsconfig.app.json
 frontend\tsconfig.json
 frontend\tsconfig.node.json
 frontend\vite.config.ts
+http___localhost_8081_api_auth_register-1730815146310.jpeg
 instruction.md
 package.json
 package-lock.json
