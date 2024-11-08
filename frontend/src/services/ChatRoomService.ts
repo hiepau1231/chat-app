@@ -1,45 +1,30 @@
 import { ChatRoom } from '../models/ChatRoom';
+import { api } from './api';
 
 class ChatRoomService {
-  private baseUrl = 'http://localhost:8082/api/chat-rooms';
+  private baseUrl = '/api/chat-rooms';
 
   async getChatRooms(page: number = 0, size: number = 20): Promise<{
     content: ChatRoom[];
     totalPages: number;
   }> {
-    const token = localStorage.getItem('token');
-    const response = await fetch(
-      `${this.baseUrl}?page=${page}&size=${size}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-
-    if (!response.ok) {
+    try {
+      const response = await api.get(`${this.baseUrl}?page=${page}&size=${size}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching chat rooms:', error);
       throw new Error('Failed to fetch chat rooms');
     }
-
-    return response.json();
   }
 
   async createChatRoom(name: string, members: string[]): Promise<ChatRoom> {
-    const token = localStorage.getItem('token');
-    const response = await fetch(this.baseUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ name, members })
-    });
-
-    if (!response.ok) {
+    try {
+      const response = await api.post(this.baseUrl, { name, members });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating chat room:', error);
       throw new Error('Failed to create chat room');
     }
-
-    return response.json();
   }
 }
 

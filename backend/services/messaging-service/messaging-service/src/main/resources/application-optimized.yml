@@ -9,8 +9,8 @@ spring:
       uri: mongodb+srv://mrrdavidd:lrrDHlAcQHFC1dg6@hiep.segu1.mongodb.net/chatapp_messages
       auto-index-creation: true
       connection-pool:
-        max-size: 50
-        min-size: 5
+        max-size: 100
+        min-size: 10
       connect-timeout: 10000
       socket-timeout: 10000
       max-wait-time: 10000
@@ -29,10 +29,10 @@ spring:
       read-preference: PRIMARY_PREFERRED
 
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
     listener:
       simple:
         retry:
@@ -45,9 +45,17 @@ spring:
     template:
       reply-timeout: 5000
 
+  web:
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+      allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+      allowed-headers: "*"
+      allow-credentials: true
+      exposed-headers: "Authorization"
+
 eureka:
   client:
-    serviceUrl:
+    service-url:
       defaultZone: http://localhost:8761/eureka/
     fetch-registry: true
     register-with-eureka: true
@@ -72,6 +80,10 @@ logging:
     max-size: 10MB
     max-history: 7
 
+jwt:
+  secret: ${JWT_SECRET:your_jwt_secret_key_here_make_it_long_and_secure_at_least_256_bits}
+  expiration: 86400000
+
 management:
   endpoints:
     web:
@@ -95,7 +107,7 @@ management:
       enabled: true
 
 websocket:
-  allowed-origins: http://localhost:5173
+  allowed-origins: ${WS_ALLOWED_ORIGINS:http://localhost:5173}
   endpoint: /ws
   destination-prefixes: /topic,/queue
   user-registry: /user

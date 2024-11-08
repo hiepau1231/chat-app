@@ -1,11 +1,43 @@
 package com.chatapp.model;
 
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum MessageStatus {
-    SENT,
-    DELIVERED,
-    READ;
+    SENT("sent"),
+    DELIVERED("delivered"),
+    READ("read");
+
+    private final String value;
+
+    MessageStatus(String value) {
+        this.value = value;
+    }
+
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
+
+    @JsonCreator
+    public static MessageStatus fromString(String value) {
+        if (value == null) {
+            return null;
+        }
+        
+        for (MessageStatus status : MessageStatus.values()) {
+            if (status.value.equals(value)) { // Thay đổi từ equalsIgnoreCase sang equals
+                return status;
+            }
+        }
+        throw new IllegalArgumentException("Unknown MessageStatus value: " + value);
+    }
+
+    @Override
+    public String toString() {
+        return value;
+    }
 
     public enum Status {
         SENT,

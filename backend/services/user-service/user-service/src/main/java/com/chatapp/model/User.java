@@ -1,37 +1,81 @@
 package com.chatapp.model;
 
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+@Document(collection = "users")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "users")
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(unique = true, nullable = false)
+    @Indexed(unique = true)
     private String username;
 
-    @Column(unique = true, nullable = false)
+    @Indexed(unique = true)
     private String email;
 
-    @Column(nullable = false)
     private String password;
 
-    @Enumerated(EnumType.STRING)
     @Builder.Default
     private Role role = Role.USER;
+
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    private LocalDateTime lastLogin;
+
+    @Builder.Default
+    private UserStatus status = UserStatus.OFFLINE;
+
+    @Builder.Default
+    private UserProfile profile = new UserProfile();
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UserProfile {
+        private String avatar;
+        private String bio;
+        
+        @Builder.Default
+        private List<String> friends = new ArrayList<>();
+        
+        @Builder.Default
+        private UserSettings settings = new UserSettings();
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UserSettings {
+        @Builder.Default
+        private boolean emailNotifications = true;
+        
+        @Builder.Default
+        private boolean pushNotifications = true;
+        
+        @Builder.Default
+        private String theme = "light";
+        
+        @Builder.Default
+        private String language = "en";
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -2,6 +2,7 @@ package com.chatapp.service;
 
 import com.chatapp.dto.RegisterRequest;
 import com.chatapp.dto.UserResponse;
+import com.chatapp.exception.ResourceNotFoundException;
 import com.chatapp.model.User;
 import com.chatapp.model.Role;
 import com.chatapp.repository.UserRepository;
@@ -40,11 +41,12 @@ public class UserService implements UserDetailsService {
             throw new RuntimeException("Email đã được đăng ký");
         }
 
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(Role.USER);
+        User user = User.builder()
+            .username(request.getUsername())
+            .email(request.getEmail())
+            .password(passwordEncoder.encode(request.getPassword()))
+            .role(Role.USER)
+            .build();
 
         User savedUser = userRepository.save(user);
         log.info("Successfully registered user: {}", request.getEmail());
@@ -69,9 +71,10 @@ public class UserService implements UserDetailsService {
         return savedUser;
     }
 
-    public Optional<User> getUserById(Long id) {
+    public User getUserById(String id) {
         log.debug("Getting user by id: {}", id);
-        return userRepository.findById(id);
+        return userRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
     }
 
     public Optional<User> getUserByEmail(String email) {
@@ -84,7 +87,8 @@ public class UserService implements UserDetailsService {
         return Map.of(
             "id", user.getId(),
             "email", user.getEmail(),
-            "username", user.getUsername()
+            "username", user.getUsername(),
+            "profile", user.getProfile()
         );
     }
 

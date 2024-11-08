@@ -6,6 +6,10 @@ spring:
     allow-bean-definition-overriding: true
   application:
     name: API-GATEWAY
+  data:
+    redis:
+      host: localhost
+      port: 6379
   cloud:
     gateway:
       discovery:
@@ -31,26 +35,47 @@ spring:
           predicates:
             - Path=/api/auth/**
           filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@userKeyResolver}"
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
             - PreserveHostHeader
+            - name: NoAuthFilter
 
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
             - Path=/api/users/**
           filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 20
+                redis-rate-limiter.burstCapacity: 40
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@userKeyResolver}"
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
             - PreserveHostHeader
-            - AddRequestHeader=Authorization, ${#request.headers['Authorization']}
+            - name: NoAuthFilter
 
         - id: messaging-service
           uri: lb://MESSAGING-SERVICE
           predicates:
             - Path=/api/messages/**, /api/chat-rooms/**, /ws/**
           filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 30
+                redis-rate-limiter.burstCapacity: 60
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@userKeyResolver}"
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
             - PreserveHostHeader
-            - AddRequestHeader=Authorization, ${#request.headers['Authorization']}
+            - RewritePath=/api/messages/(?<segment>.*), /api/messages/${segment}
+            - RewritePath=/api/chat-rooms/(?<segment>.*), /api/chat-rooms/${segment}
+            - name: NoAuthFilter
 
 eureka:
   client:
@@ -60,9 +85,6 @@ eureka:
     register-with-eureka: true
   instance:
     prefer-ip-address: true
-
-jwt:
-  secret: your_jwt_secret_key_here_make_it_long_and_secure_at_least_256_bits
 
 management:
   endpoints:
@@ -77,3 +99,4 @@ logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     reactor.netty: DEBUG
+    org.springframework.security: DEBUG

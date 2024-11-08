@@ -6,22 +6,42 @@ spring:
     name: user-service
   main:
     allow-bean-definition-overriding: true
-  jackson:
-    deserialization:
-      fail-on-unknown-properties: false
-  datasource:
-    url: jdbc:postgresql://localhost:5433/chatapp_users
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+  data:
+    mongodb:
+      uri: mongodb+srv://mrrdavidd:lrrDHlAcQHFC1dg6@hiep.segu1.mongodb.net/chatapp_messages
+      auto-index-creation: true
+      connection-pool:
+        max-size: 50
+        min-size: 5
+      connect-timeout: 10000
+      socket-timeout: 10000
+      max-wait-time: 10000
+      max-connection-idle-time: 300000
+      max-connection-life-time: 3600000
+      server-selection-timeout: 15000
+      heartbeat-frequency: 10000
+      local-threshold: 15
+      retry-writes: true
+      retry-reads: true
+      ssl:
+        enabled: true
+        invalid-hostname-allowed: false
+      write-concern: MAJORITY
+      read-concern: MAJORITY
+      read-preference: PRIMARY_PREFERRED
+
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 60000
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 2
+        max-wait: -1ms
 
 eureka:
   client:
@@ -31,23 +51,47 @@ eureka:
     register-with-eureka: true
   instance:
     prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
 
 jwt:
-  secret: your_jwt_secret_key_here_make_it_long_and_secure_at_least_256_bits
+  secret: VGhpc0lzQVNlY3VyZUpXVFNlY3JldEtleUZvckNoYXRBcHBsaWNhdGlvbg==
   expiration: 86400000 # 24 hours
   refresh-expiration: 604800000 # 7 days
 
 logging:
   level:
-    org.springframework.security: DEBUG
-    com.chatapp: DEBUG
-    org.springframework.web: DEBUG
+    org.springframework.security: INFO
+    com.chatapp: INFO
+    org.springframework.web: INFO
+    org.springframework.data.mongodb: DEBUG
+    org.mongodb.driver: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/user-service.log
+    max-size: 10MB
+    max-history: 7
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       show-details: always
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
+  health:
+    mongodb:
+      enabled: true
+    redis:
+      enabled: true

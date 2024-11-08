@@ -1,26 +1,18 @@
 package com.chatapp.repository;
 
 import com.chatapp.model.UserProfile;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
-public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
-    Optional<UserProfile> findByUser_Id(Long userId);
-    Optional<UserProfile> findByUser_Email(String email);
-
-    @Query("SELECT p FROM UserProfile p WHERE " +
-           "LOWER(p.displayName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(p.bio) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
-    List<UserProfile> searchProfiles(@Param("searchTerm") String searchTerm);
-
-    @Query("SELECT p FROM UserProfile p WHERE p.profilePrivacy = 'PUBLIC'")
-    List<UserProfile> findPublicProfiles();
-
-    List<UserProfile> findByInterestsContaining(String interest);
+public interface UserProfileRepository extends MongoRepository<UserProfile, String> {
+    
+    @Query("{ 'emailNotifications': true }")
+    List<UserProfile> findAllWithEmailNotifications();
+    
+    @Query("{ 'pushNotifications': true }")
+    List<UserProfile> findAllWithPushNotifications();
 }

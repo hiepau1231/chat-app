@@ -27,6 +27,7 @@ A real-time chat application built with Spring Boot microservices and React.
 - Spring WebSocket
 - PostgreSQL
 - MongoDB
+- Redis
 - Netflix Eureka for Service Discovery
 
 ### Frontend
@@ -65,17 +66,20 @@ A real-time chat application built with Spring Boot microservices and React.
 ### Prerequisites
 - Java 17
 - Node.js 16+
-- PostgreSQL
-- MongoDB
-- Docker (optional)
+- Docker
+- Docker Compose
 
 ### Running the Application
 
-1. Start the databases:
+1. Start Redis and MongoDB using Docker:
 ```bash
-# PostgreSQL should be running on port 5433
-# MongoDB should be running on port 27017
+cd backend
+docker-compose up -d
 ```
+
+This will start:
+- Redis on port 6379
+- MongoDB on port 27017
 
 2. Start the backend services in the following order:
 ```bash

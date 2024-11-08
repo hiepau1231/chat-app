@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { validateEmail, validateRegistrationPassword } from '../../types/auth';
 import { authApi } from '../../services/api';
+import { AxiosError } from 'axios';
 
 export const RegisterForm = () => {
   const navigate = useNavigate();
@@ -33,8 +34,12 @@ export const RegisterForm = () => {
       await authApi.register(formData);
       console.log('Đăng ký thành công');
       navigate('/login');
-    } catch (err: any) {
-      setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+    } catch (err) {
+      if (err instanceof AxiosError && err.response?.data) {
+        setError(err.response.data.error || 'Đăng ký thất bại. Vui lòng thử lại.');
+      } else {
+        setError('Đăng ký thất bại. Vui lòng thử lại.');
+      }
     } finally {
       setLoading(false);
     }

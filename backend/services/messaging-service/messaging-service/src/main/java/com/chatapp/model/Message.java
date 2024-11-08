@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import java.time.LocalDateTime;
 
 @Data
@@ -17,6 +18,8 @@ public class Message {
     private String roomId;
     private LocalDateTime timestamp;
     private LocalDateTime createdAt;
+    
+    @Field
     private MessageStatus status;
 
     public Message(String content, String senderId, String roomId) {

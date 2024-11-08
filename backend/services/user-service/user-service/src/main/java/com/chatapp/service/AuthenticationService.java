@@ -4,6 +4,7 @@ import com.chatapp.dto.*;
 import com.chatapp.exception.AuthenticationException;
 import com.chatapp.exception.UserAlreadyExistsException;
 import com.chatapp.model.User;
+import com.chatapp.model.UserStatus;
 import com.chatapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -23,9 +25,8 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    @Transactional
-    public UserResponse register(RegisterRequest request) {
-        log.debug("Registering new user with email: {}", request.getEmail());
+    public AuthResponse register(RegisterRequest request) {
+        log.debug("Starting registration for user with email: {}", request.getEmail());
         
         try {
             // Check if user exists
@@ -40,31 +41,52 @@ public class AuthenticationService {
                 throw new UserAlreadyExistsException("Tên người dùng đã tồn tại");
             }
 
-            // Create new user
+            log.debug("Creating new user object for: {}", request.getEmail());
+            
+            // Create user profile and settings
+            User.UserSettings settings = new User.UserSettings();
+            User.UserProfile profile = new User.UserProfile();
+            profile.setSettings(settings);
+
+            // Create new user with additional fields
             var user = User.builder()
                     .email(request.getEmail())
                     .username(request.getUsername())
                     .password(passwordEncoder.encode(request.getPassword()))
+                    .createdAt(LocalDateTime.now())
+                    .status(UserStatus.OFFLINE)
+                    .profile(profile)
                     .build();
 
+            log.debug("Attempting to save user to database: {}", user);
             // Save user
             try {
                 user = userRepository.save(user);
-                log.info("Successfully registered user: {}", request.getEmail());
-                return mapToUserResponse(user);
+                log.info("Successfully saved user to database: {}", user.getEmail());
+                
+                log.debug("Generating tokens for user: {}", user.getEmail());
+                var accessToken = jwtService.generateToken(user);
+                var refreshToken = jwtService.generateRefreshToken(user);
+
+                log.info("Successfully completed registration for user: {}", user.getEmail());
+                return AuthResponse.builder()
+                        .accessToken(accessToken)
+                        .refreshToken(refreshToken)
+                        .user(mapToUserResponse(user))
+                        .build();
             } catch (Exception e) {
-                log.error("Error saving user to database", e);
+                log.error("Error saving user to database. Details: ", e);
                 throw new RuntimeException("Lỗi khi đăng ký người dùng. Vui lòng thử lại sau.");
             }
         } catch (UserAlreadyExistsException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Unexpected error during registration", e);
+            log.error("Unexpected error during registration. Details: ", e);
             throw new RuntimeException("Lỗi hệ thống. Vui lòng thử lại sau.");
         }
     }
 
-    public AuthResponse authenticate(AuthRequest request) {
+    public AuthResponse login(AuthRequest request) {
         log.debug("Authenticating user: {}", request.getEmail());
         
         try {
@@ -82,6 +104,11 @@ public class AuthenticationService {
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AuthenticationException("Không tìm thấy người dùng"));
 
+        // Update user status and last login
+        user.setStatus(UserStatus.ONLINE);
+        user.setLastLogin(LocalDateTime.now());
+        userRepository.save(user);
+
         var accessToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
 
@@ -98,13 +125,15 @@ public class AuthenticationService {
                 .id(user.getId())
                 .email(user.getEmail())
                 .username(user.getUsername())
+                .status(user.getStatus())
+                .profile(user.getProfile())
                 .build();
     }
 
     public AuthResponse refreshToken(String refreshToken) {
         try {
-            String email = jwtService.extractUsername(refreshToken);
-            User user = userRepository.findByEmail(email)
+            String username = jwtService.extractUsername(refreshToken);
+            User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng"));
             
             if (jwtService.isTokenValid(refreshToken, user)) {

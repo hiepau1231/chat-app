@@ -1,70 +1,105 @@
-# Current Tasks
+# Current Task Status
 
-## Backend Priority Tasks
+## Current Focus: Database Migration & User Model Enhancement
 
-1. Service Registry (Eureka Server)
-- [x] Create basic Eureka Server configuration
-- [x] Configure service discovery for all microservices
-- [x] Add health checks and monitoring
-- [x] Configure logging
+### Completed Tasks
 
-2. API Gateway
-- [x] Configure routes for all services
-- [x] Implement CORS configuration
-- [x] Add authentication filter
-- [x] Configure load balancing
+1. Database Migration
+   - [x] Chuyển đổi toàn bộ sang MongoDB
+     - [x] Thiết kế schema cho collections
+     - [x] Cập nhật User model
+     - [x] Cập nhật Message model
+     - [x] Cập nhật ChatRoom model
+   - [x] Chuẩn hóa dữ liệu
+     - [x] Thống nhất email domain (@chatapp.com)
+     - [x] Thêm UserStatus enum
+     - [x] Cập nhật cấu trúc profile
 
-3. Messaging Service
-- [x] Basic structure setup
-- [x] Models and repositories
-- [x] WebSocket configuration
-- [x] Chat room management
-- [x] Message persistence
-- [x] Real-time notifications
-- [x] Typing indicators
-- [x] User status updates
+2. User Model Enhancement
+   - [x] Cải thiện status management
+     - [x] Thêm UserStatus enum (ONLINE, OFFLINE, AWAY)
+     - [x] Cập nhật migration service
+     - [x] Cập nhật user service
+   - [x] Profile structure
+     - [x] Thêm UserProfile class
+     - [x] Thêm UserSettings class
+     - [x] Cấu hình mặc định cho settings
 
-4. User Service
-- [x] Basic authentication
-- [x] User registration
-- [x] JWT implementation
-- [x] User profile management
-- [x] Friend/Contact system
-- [x] User search functionality
+### Current Tasks
 
-5. Video Call Service (New)
-- [ ] WebRTC setup
-- [ ] Signaling server
-- [ ] TURN/STUN configuration
-- [ ] Group call support
-- [ ] Screen sharing
+1. User Profile Enhancements
+   - [ ] Avatar upload functionality
+     - [ ] File upload service
+     - [ ] Image processing
+     - [ ] Storage integration
+   - [ ] Profile completion status
+     - [ ] Progress tracking
+     - [ ] Validation rules
+   - [ ] Activity tracking
+     - [ ] Last active status
+     - [ ] Session management
+     - [ ] Device tracking
 
-6. Notification Service (New)
-- [ ] Real-time notifications
-- [ ] Push notifications
-- [ ] Email notifications
-- [ ] Notification preferences
+2. Notification Service Setup
+   - [ ] Thiết kế kiến trúc service
+     - [ ] Define notification models
+     - [ ] Design database schema
+     - [ ] Plan notification types
+   - [ ] Xây dựng core components
+     - [ ] Notification controller
+     - [ ] WebSocket integration
+     - [ ] Storage service
+   - [ ] Tích hợp với các service hiện có
+     - [ ] Message Service integration
+     - [ ] User Service integration
+     - [ ] Real-time delivery system
 
-## Infrastructure Tasks
+### Technical Context
 
-1. Database Setup
-- [x] PostgreSQL for User Service
-- [x] MongoDB for Message Service
-- [x] Redis for caching
-- [ ] Elasticsearch for search
+#### Database Structure
+- MongoDB Collections:
+  - users: User data và profile
+  - chat_rooms: Room information
+  - messages: Chat messages
 
-2. Monitoring
-- [ ] Configure Prometheus
-- [ ] Setup Grafana dashboards
-- [ ] Implement logging with ELK Stack
+#### User Model Updates
+- Enum UserStatus cho user status
+- Nested objects cho profile và settings
+- Chuẩn hóa email domain
 
-3. Search Infrastructure
-- [ ] Setup Elasticsearch
-- [ ] Configure Logstash pipeline
-- [ ] Setup Kibana dashboards
-- [ ] Implement search APIs
+#### Backend Security
+- Rate limiting per user/IP
+- Token validation và revocation
+- Redis integration cho caching và rate limiting
+- Improved logging và monitoring
 
-## Next Steps Priority:
-1. Start on notification system
-2. Implement search infrastructure
-3. Begin video call service development
+### Dependencies
+- MongoDB cho data storage
+- Redis cho caching và rate limiting
+- JWT libraries
+- WebSocket cho real-time features
+
+### Implementation Notes
+
+1. Database Migration
+   - MongoDB schema đã được cập nhật
+   - Data migration đã hoàn thành
+   - User model đã được cải thiện
+
+2. Next Steps
+   - Testing new data structure
+   - Monitoring system performance
+   - User feedback collection
+   - Documentation updates
+
+### Performance Goals
+- Sub-second response times
+- Minimal memory footprint
+- Efficient data querying
+- Optimized MongoDB usage
+
+### Monitoring Requirements
+- Track database performance
+- Monitor user activities
+- Track system resources
+- Performance metrics collection

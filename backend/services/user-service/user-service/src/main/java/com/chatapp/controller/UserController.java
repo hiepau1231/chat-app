@@ -1,7 +1,7 @@
 package com.chatapp.controller;
 
 import com.chatapp.model.User;
-import com.chatapp.model.UserProfile;
+import com.chatapp.model.User.UserProfile;
 import com.chatapp.service.UserService;
 import com.chatapp.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -38,11 +39,13 @@ public class UserController {
             log.debug("User found: {}", user.getEmail());
             Map<String, Object> userProfile = userService.getUserProfile(user);
             
-            userProfileService.getUserProfileByEmail(user.getEmail()).ifPresent(profile -> {
-                userProfile.put("displayName", profile.getDisplayName());
+            UserProfile profile = user.getProfile();
+            if (profile != null) {
                 userProfile.put("bio", profile.getBio());
-                userProfile.put("avatarUrl", profile.getAvatarUrl());
-            });
+                userProfile.put("avatar", profile.getAvatar());
+                userProfile.put("friends", profile.getFriends());
+                userProfile.put("settings", profile.getSettings());
+            }
             
             log.debug("User profile: {}", userProfile);
             
@@ -55,10 +58,13 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable Long id) {
-        return userService.getUserById(id)
-                .map(user -> ResponseEntity.ok(userService.getUserProfile(user)))
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<User> getUser(@PathVariable String id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    @GetMapping("/{id}/profile")
+    public ResponseEntity<UserProfile> getUserProfile(@PathVariable String id) {
+        return ResponseEntity.ok(userProfileService.getUserProfile(id));
     }
 
     @GetMapping("/email/{email}")
@@ -85,14 +91,22 @@ public class UserController {
     @GetMapping("/search")
     public ResponseEntity<List<Map<String, Object>>> searchUsers(
             @RequestParam String query) {
-        List<Map<String, Object>> results = userProfileService.searchUsers(query);
+        List<User> users = userProfileService.searchUsers(query);
+        List<Map<String, Object>> results = users.stream()
+            .map(user -> Map.of(
+                "id", user.getId(),
+                "username", user.getUsername(),
+                "email", user.getEmail(),
+                "profile", user.getProfile()
+            ))
+            .collect(Collectors.toList());
         return ResponseEntity.ok(results);
     }
 
     @PostMapping("/{friendId}/add")
     public ResponseEntity<?> addFriend(
             @AuthenticationPrincipal User user,
-            @PathVariable Long friendId) {
+            @PathVariable String friendId) {
         try {
             userProfileService.addFriend(user.getId(), friendId);
             return ResponseEntity.ok().build();
@@ -106,7 +120,7 @@ public class UserController {
     @DeleteMapping("/{friendId}/remove")
     public ResponseEntity<?> removeFriend(
             @AuthenticationPrincipal User user,
-            @PathVariable Long friendId) {
+            @PathVariable String friendId) {
         try {
             userProfileService.removeFriend(user.getId(), friendId);
             return ResponseEntity.ok().build();
@@ -121,8 +135,16 @@ public class UserController {
     public ResponseEntity<List<Map<String, Object>>> getUserFriends(
             @AuthenticationPrincipal User user) {
         try {
-            List<Map<String, Object>> friends = userProfileService.getUserFriends(user.getId());
-            return ResponseEntity.ok(friends);
+            List<User> friends = userProfileService.getUserFriends(user.getId());
+            List<Map<String, Object>> friendsData = friends.stream()
+                .map(friend -> Map.of(
+                    "id", friend.getId(),
+                    "username", friend.getUsername(),
+                    "email", friend.getEmail(),
+                    "profile", friend.getProfile()
+                ))
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(friendsData);
         } catch (Exception e) {
             log.error("Error getting friends: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
