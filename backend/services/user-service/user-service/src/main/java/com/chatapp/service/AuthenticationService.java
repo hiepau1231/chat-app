@@ -13,6 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.data.redis.RedisConnectionFailureException;
 
 import java.time.LocalDateTime;
 
@@ -29,6 +30,17 @@ public class AuthenticationService {
         log.debug("Starting registration for user with email: {}", request.getEmail());
         
         try {
+            // Validate request
+            if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+                throw new IllegalArgumentException("Email không được để trống");
+            }
+            if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+                throw new IllegalArgumentException("Tên người dùng không được để trống");
+            }
+            if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+                throw new IllegalArgumentException("Mật khẩu không được để trống");
+            }
+
             // Check if user exists
             if (userRepository.findByEmail(request.getEmail()).isPresent()) {
                 log.warn("Email already registered: {}", request.getEmail());
@@ -43,42 +55,56 @@ public class AuthenticationService {
 
             log.debug("Creating new user object for: {}", request.getEmail());
             
-            // Create user profile and settings
-            User.UserSettings settings = new User.UserSettings();
-            User.UserProfile profile = new User.UserProfile();
-            profile.setSettings(settings);
+            // Create user settings with default values
+            User.UserSettings settings = User.UserSettings.builder()
+                .emailNotifications(true)
+                .pushNotifications(true)
+                .theme("light")
+                .language("vi")
+                .build();
 
-            // Create new user with additional fields
-            var user = User.builder()
-                    .email(request.getEmail())
-                    .username(request.getUsername())
-                    .password(passwordEncoder.encode(request.getPassword()))
-                    .createdAt(LocalDateTime.now())
-                    .status(UserStatus.OFFLINE)
-                    .profile(profile)
-                    .build();
+            // Create user profile
+            User.UserProfile profile = User.UserProfile.builder()
+                .settings(settings)
+                .build();
 
-            log.debug("Attempting to save user to database: {}", user);
-            // Save user
+            // Create new user
+            User user = User.builder()
+                .email(request.getEmail())
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .createdAt(LocalDateTime.now())
+                .status(UserStatus.OFFLINE)
+                .profile(profile)
+                .build();
+
+            log.debug("Attempting to save user to database: {}", user.getEmail());
+            
+            // Save user to MongoDB
+            user = userRepository.save(user);
+            log.info("Successfully saved user to database: {}", user.getEmail());
+            
+            // Generate tokens
+            log.debug("Generating tokens for user: {}", user.getEmail());
+            String accessToken = jwtService.generateToken(user);
+            String refreshToken;
+            
             try {
-                user = userRepository.save(user);
-                log.info("Successfully saved user to database: {}", user.getEmail());
-                
-                log.debug("Generating tokens for user: {}", user.getEmail());
-                var accessToken = jwtService.generateToken(user);
-                var refreshToken = jwtService.generateRefreshToken(user);
-
-                log.info("Successfully completed registration for user: {}", user.getEmail());
-                return AuthResponse.builder()
-                        .accessToken(accessToken)
-                        .refreshToken(refreshToken)
-                        .user(mapToUserResponse(user))
-                        .build();
-            } catch (Exception e) {
-                log.error("Error saving user to database. Details: ", e);
-                throw new RuntimeException("Lỗi khi đăng ký người dùng. Vui lòng thử lại sau.");
+                refreshToken = jwtService.generateRefreshToken(user);
+            } catch (RedisConnectionFailureException e) {
+                log.warn("Redis connection failed. Using fallback token generation: {}", e.getMessage());
+                // Fallback: Generate refresh token without Redis caching
+                refreshToken = jwtService.generateTokenWithoutCaching(user);
             }
-        } catch (UserAlreadyExistsException e) {
+
+            log.info("Successfully completed registration for user: {}", user.getEmail());
+            return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .user(mapToUserResponse(user))
+                .build();
+
+        } catch (IllegalArgumentException | UserAlreadyExistsException e) {
             throw e;
         } catch (Exception e) {
             log.error("Unexpected error during registration. Details: ", e);
@@ -109,8 +135,16 @@ public class AuthenticationService {
         user.setLastLogin(LocalDateTime.now());
         userRepository.save(user);
 
-        var accessToken = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
+        String accessToken = jwtService.generateToken(user);
+        String refreshToken;
+        
+        try {
+            refreshToken = jwtService.generateRefreshToken(user);
+        } catch (RedisConnectionFailureException e) {
+            log.warn("Redis connection failed. Using fallback token generation: {}", e.getMessage());
+            // Fallback: Generate refresh token without Redis caching
+            refreshToken = jwtService.generateTokenWithoutCaching(user);
+        }
 
         log.info("Successfully authenticated user: {}", request.getEmail());
         return AuthResponse.builder()
